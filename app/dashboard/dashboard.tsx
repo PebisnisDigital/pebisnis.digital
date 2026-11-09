@@ -3,6 +3,11 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type { SupabasePublicConfig } from "../lib/config";
 import { getSupabase } from "../lib/supabase";
+import batch08 from "./batch08.json";
+import { makeEpisodeDoodleCard, type EpisodeVisual } from "./episode-visual";
+
+type BatchEpisode = EpisodeVisual & { caption: string; material: string };
+const BATCH_08_EPISODES = batch08.episodes as BatchEpisode[];
 
 type Profile = { role: string; status: string; display_name: string | null };
 type Health = { status: string; job_count: number };
@@ -1034,6 +1039,8 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
   const [content365StartDate, setContent365StartDate] = useState(() => dateInputValueInTimeZone());
   const [content365Busy, setContent365Busy] = useState<string | null>(null);
   const [content365Message, setContent365Message] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [batch08Busy, setBatch08Busy] = useState(false);
+  const [batch08Progress, setBatch08Progress] = useState("");
   const [postBusy, setPostBusy] = useState(false);
   const [postMessage, setPostMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [postCategoryId, setPostCategoryId] = useState("");
@@ -2677,6 +2684,127 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
     }
   }
 
+  async function importBatch08() {
+    if (batch08Busy) return;
+    const confirmed = window.confirm(
+      "Isi 30 slot Bagian 8 (Hari 211–240) dengan naskah baru dan gambar doodle hitam-putih? " +
+      "Setiap slot akan berstatus Aktif dalam rotasi 06.00 WIB. Slot yang sudah berisi tidak akan ditimpa."
+    );
+    if (!confirmed) return;
+
+    setBatch08Busy(true);
+    setBatch08Progress("Memeriksa isi kalender dan draft yang sudah ada...");
+    setContent365Message(null);
+    let completed = 0;
+    try {
+      const supabase = getSupabase(config);
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) throw new Error("Sesi admin berakhir. Login kembali sebelum mengisi Bagian 8.");
+      const categoryId = categories.find((category) => category.status === "ACTIVE")?.id;
+      if (!categoryId) throw new Error("Kategori materi aktif tidak tersedia.");
+
+      const [slotsResponse, postsResponse] = await Promise.all([
+        supabase.from("content_365_items").select("day_number,source_post_id,status").gte("day_number", 211).lte("day_number", 240),
+        supabase.from("channel_posts").select("id,caption,prompts(title)").order("created_at", { ascending: false }).limit(500),
+      ]);
+      if (slotsResponse.error) throw slotsResponse.error;
+      if (postsResponse.error) throw postsResponse.error;
+      const slots = new Map((slotsResponse.data ?? []).map((item) => [item.day_number, item]));
+      const posts = ((postsResponse.data ?? []) as unknown as Array<{
+        id: string; caption: string; prompts: { title: string } | Array<{ title: string }> | null;
+      }>).map((post) => ({
+        id: post.id,
+        caption: post.caption,
+        title: Array.isArray(post.prompts) ? post.prompts[0]?.title : post.prompts?.title,
+      }));
+      if (BATCH_08_EPISODES.length !== 30 || BATCH_08_EPISODES.some((episode, index) => episode.day !== index + 211)) {
+        throw new Error("Paket Bagian 8 tidak lengkap atau urutan harinya tidak sesuai.");
+      }
+      for (const episode of BATCH_08_EPISODES) {
+        const title = `EPS ${episode.day} · ${episode.pillar}`;
+        const priorPost = posts.find((post) => post.title === title);
+        const slot = slots.get(episode.day);
+        if (slot) {
+          if (!priorPost || slot.source_post_id !== priorPost.id) {
+            throw new Error(`Hari ${episode.day} sudah berisi konten lain. Tidak ada data yang ditimpa.`);
+          }
+          completed += 1;
+          setBatch08Progress(`${completed}/30 — Hari ${episode.day} sudah sesuai, dilewati.`);
+          continue;
+        }
+        if (priorPost && priorPost.caption !== episode.caption) {
+          throw new Error(`Judul ${title} sudah digunakan untuk konten berbeda. Periksa dulu sebelum melanjutkan.`);
+        }
+
+        let postId = priorPost?.id;
+        if (!postId) {
+          setBatch08Progress(`${completed + 1}/30 — Membuat visual EPS ${episode.day}...`);
+          const imageFile = await makeEpisodeDoodleCard(episode);
+          const imagePath = `${user.id}/${crypto.randomUUID()}.webp`;
+          const { error: uploadError } = await supabase.storage.from("channel-post-images").upload(imagePath, imageFile, {
+            contentType: "image/webp", cacheControl: "3600", upsert: false,
+          });
+          if (uploadError) throw new Error(`EPS ${episode.day}: gambar gagal diunggah — ${uploadError.message}`);
+
+          let created = false;
+          try {
+            const parts = episode.material.split(/\n\s*---\s*\n/g).map((part) => part.trim()).filter(Boolean);
+            if (parts.some((part) => part.length > 4096) || !parts.length || episode.caption.length > 1024) {
+              throw new Error(`EPS ${episode.day}: panjang materi tidak sesuai batas Telegram.`);
+            }
+            const { data: newPost, error: createError } = await supabase.rpc("admin_create_channel_post_with_automation", {
+              p_category_id: categoryId,
+              p_title: title,
+              p_description: null,
+              p_prompt_parts: parts,
+              p_license_type: "ORIGINAL",
+              p_creator_name: "PEBISNIS DIGITAL TELEGRAM",
+              p_source_url: null,
+              p_permission_reference: null,
+              p_image_path: imagePath,
+              p_caption: episode.caption,
+              p_upsell_mode: "NONE",
+              p_scheduled_at: null,
+              p_automation_name: `Komentar · ${title}`,
+              p_keywords: ["MAU"],
+              p_match_mode: "EXACT",
+              p_public_success_reply: "Siap, sudah saya kirim kak, cek japri. ✅",
+              p_start_required_reply: "Buka bot dan tekan START dulu agar materi bisa dikirim ke japri.",
+              p_membership_required_reply: "Syarat join belum lengkap. Buka bot lalu cek keanggotaan.",
+              p_automation_status: "ACTIVE",
+            });
+            if (createError) throw createError;
+            postId = (newPost as { id?: string } | null)?.id;
+            if (!postId) throw new Error("Database tidak mengembalikan ID konten yang baru dibuat.");
+            created = true;
+            posts.unshift({ id: postId, caption: episode.caption, title });
+          } finally {
+            if (!created) await supabase.storage.from("channel-post-images").remove([imagePath]);
+          }
+        }
+
+        setBatch08Progress(`${completed + 1}/30 — Menyimpan EPS ${episode.day} ke kalender...`);
+        const { data: assigned, error: assignError } = await supabase.rpc("admin_content_365_assign_post", {
+          p_day_number: episode.day, p_source_post_id: postId, p_status: "ACTIVE",
+        });
+        if (assignError) throw new Error(`Hari ${episode.day}: ${assignError.message}`);
+        if ((assigned as { day_number?: number } | null)?.day_number !== episode.day) {
+          throw new Error(`Hari ${episode.day}: hasil penyimpanan belum terverifikasi.`);
+        }
+        completed += 1;
+      }
+      await refreshContent365();
+      setContent365Page(7);
+      setContent365Message({ type: "success", text: "Bagian 8 selesai: 30 episode dan visual baru tersimpan di Hari 211–240 dengan status Aktif." });
+      setBatch08Progress("30/30 selesai dan terverifikasi.");
+    } catch (error) {
+      await refreshContent365();
+      setContent365Message({ type: "error", text: `Bagian 8 terhenti pada ${completed}/30. ${error instanceof Error ? error.message : "Terjadi kesalahan."} Jalankan lagi untuk melanjutkan, bukan menimpa.` });
+    } finally {
+      setBatch08Busy(false);
+    }
+  }
+
   async function replaceContent365Slot(dayNumber: number, sourcePostId: string, status: Content365Item["status"] = "ACTIVE") {
     setContent365Busy("day");
     setContent365Message(null);
@@ -3529,8 +3657,12 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
       <section id="kalender-365" className="content365-card" hidden={activeWorkspace !== "content" || activeWorkspaceSection.content !== "kalender-365"} aria-labelledby="content365-calendar-title">
         <div className="content365-heading">
           <div><p className="eyebrow">ROTASI FLEKSIBEL</p><h2 id="content365-calendar-title">Kalender {content365Duration} Hari</h2><p>Pilih satu materi untuk setiap hari. Setelah hari terakhir, konten bisa kembali ke Hari 1.</p></div>
-          <button className="button secondary" type="button" onClick={() => refreshContent365(true)} disabled={content365Busy === "refresh"}>{content365Busy === "refresh" ? "Memuat..." : "Segarkan"}</button>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            {content365Duration >= 240 ? <button className="button secondary" type="button" onClick={() => void importBatch08()} disabled={batch08Busy || Boolean(content365Busy)}>{batch08Busy ? "Mengisi Bagian 8..." : "Isi Bagian 8"}</button> : null}
+            <button className="button secondary" type="button" onClick={() => refreshContent365(true)} disabled={content365Busy === "refresh" || batch08Busy}>{content365Busy === "refresh" ? "Memuat..." : "Segarkan"}</button>
+          </div>
         </div>
+        {batch08Progress ? <p className="integration-result" role="status" aria-live="polite">{batch08Progress}</p> : null}
         <div className="content365-summary">
           <article className={content365Settings?.enabled ? "is-active" : "is-paused"}><span>STATUS</span><strong>{content365Settings?.enabled ? "AKTIF" : "NONAKTIF"}</strong><small>{content365Settings?.enabled ? `Kirim ${content365SendTime} WIB` : "Tidak ada kiriman otomatis"}</small></article>
           <article><span>TERISI</span><strong>{content365ConfiguredCount}/{content365Duration}</strong><small>{content365Duration - content365ConfiguredCount} hari masih kosong</small></article>
