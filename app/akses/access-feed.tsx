@@ -88,7 +88,7 @@ function BrandAvatar({ compact = false }: { compact?: boolean }) {
 
 export function AccessFeed({ config }: { config: SupabasePublicConfig | null }) {
   const [episodes, setEpisodes] = useState<Episode[]>(STATIC_EPISODES);
-  const [source, setSource] = useState<"static" | "loading" | "live">("loading");
+  const [source, setSource] = useState<"static" | "live">("static");
   const [filter, setFilter] = useState<Filter>("SEMUA");
   const [view, setView] = useState<View>("grid");
   const [search, setSearch] = useState("");
@@ -153,7 +153,6 @@ export function AccessFeed({ config }: { config: SupabasePublicConfig | null }) 
   useEffect(() => { setShowCount(20); }, [filter, search, view, sort]);
 
   useEffect(() => {
-    if (source === "loading") return;
     const targets = [...visible, ...(selected ? [selected] : [])].filter((episode) => !imageUrls[episode.day] && !fetchingImages.current.has(episode.day));
     if (!targets.length) return;
     for (const episode of targets) fetchingImages.current.add(episode.day);
@@ -260,7 +259,7 @@ export function AccessFeed({ config }: { config: SupabasePublicConfig | null }) 
 
         <section className="ig-highlights" aria-label="Kategori materi">
           <button className={filter === "SEMUA" ? "ig-highlight active" : "ig-highlight"} onClick={() => setFilter("SEMUA")}><span className="ig-highlight-ring"><span className="ig-highlight-icon">✦</span></span><strong>Semua EPS</strong></button>
-          {PILLARS.map((pillar) => <button className={filter === pillar ? "ig-highlight active" : "ig-highlight"} key={pillar} onClick={() => setFilter(pillar)}><span className="ig-highlight-ring"><span className="ig-highlight-icon" style={{ color: PILLAR_COLORS[pillar] }}>{pillar === "PIKIR" ? "✳" : pillar === "PEMBELI" ? "♡" : pillar === "PRODUK" ? "◇" : "↗"}</span></span><strong>{pillar[0] + pillar.slice(1).toLowerCase()}</strong></button>)}
+          {PILLARS.map((pillar) => <button className={filter === pillar ? "ig-highlight active" : "ig-highlight"} key={pillar} onClick={() => setFilter(pillar)}><span className="ig-highlight-ring"><span className="ig-highlight-icon" style={{ color: PILLAR_COLORS[pillar] }}>{pillar === "PIKIR" ? "✳" : pillar === "PEMBELI" ? "♡" : pillar === "PRODUK" ? "◇" : "⚙"}</span></span><strong>{pillar[0] + pillar.slice(1).toLowerCase()}</strong></button>)}
         </section>
 
         <section id="ig-posts" className="ig-collection" aria-label="Semua materi dan episode">
