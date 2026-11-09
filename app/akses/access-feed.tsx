@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 import type { SupabasePublicConfig } from "../lib/config";
-import { getSupabase } from "../lib/supabase";
 import { makeEpisodeDoodleCard } from "../dashboard/episode-visual";
 import batch08 from "../dashboard/batch08.json";
 import batch09 from "../dashboard/batch09.json";
@@ -87,6 +87,10 @@ function BrandAvatar({ compact = false }: { compact?: boolean }) {
 }
 
 export function AccessFeed({ config }: { config: SupabasePublicConfig | null }) {
+  // Deliberately anonymous: /akses never reads or refreshes an admin session.
+  const publicClient = useMemo(() => config ? createClient(config.url, config.publishableKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  }) : null, [config?.url, config?.publishableKey]);
   const [episodes, setEpisodes] = useState<Episode[]>(STATIC_EPISODES);
   const [source, setSource] = useState<"static" | "live">("static");
   const [filter, setFilter] = useState<Filter>("SEMUA");
@@ -116,10 +120,9 @@ export function AccessFeed({ config }: { config: SupabasePublicConfig | null }) 
   }, []);
 
   useEffect(() => {
-    if (!config) { setSource("static"); return; }
+    if (!publicClient) { setSource("static"); return; }
     let cancelled = false;
-    const supabase = getSupabase(config);
-    void Promise.resolve(supabase.rpc("public_akses_episodes")).then(({ data, error }) => {
+    void Promise.resolve(publicClient.rpc("public_akses_episodes")).then(({ data, error }) => {
       if (cancelled) return;
       if (error || !Array.isArray(data) || !data.length) { setSource("static"); return; }
       const incoming = (data as PublicRow[]).map((row) => ({
@@ -134,7 +137,7 @@ export function AccessFeed({ config }: { config: SupabasePublicConfig | null }) 
       setSource("live");
     }).catch(() => { if (!cancelled) setSource("static"); });
     return () => { cancelled = true; };
-  }, [config]);
+  }, [publicClient]);
 
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -156,7 +159,7 @@ export function AccessFeed({ config }: { config: SupabasePublicConfig | null }) 
     const targets = [...visible, ...(selected ? [selected] : [])].filter((episode) => !imageUrls[episode.day] && !fetchingImages.current.has(episode.day));
     if (!targets.length) return;
     for (const episode of targets) fetchingImages.current.add(episode.day);
-    const supabase = config ? getSupabase(config) : null;
+    const supabase = publicClient;
     async function resolveImage(episode: Episode) {
       let url = "";
       if (supabase && episode.imagePath && source === "live") {
@@ -172,7 +175,7 @@ export function AccessFeed({ config }: { config: SupabasePublicConfig | null }) 
       fetchingImages.current.delete(episode.day);
     }
     void Promise.all(targets.map((episode) => resolveImage(episode).catch(() => { fetchingImages.current.delete(episode.day); })));
-  }, [config, imageUrls, selected, source, visible]);
+  }, [publicClient, imageUrls, selected, source, visible]);
 
   useEffect(() => {
     const owner = ownedUrls.current;

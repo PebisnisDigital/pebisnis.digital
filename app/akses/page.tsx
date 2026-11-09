@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "365 Materi Gratis · Pebisnis Digital",
   description: "Buka gambar dan baca langsung materi Pebisnis Digital, tanpa login dan tanpa harus komentar. Belajar bikin usaha di era AI, satu episode setiap hari.",
+  robots: { index: false, follow: false },
 };
 
 export default function AksesPage() {
