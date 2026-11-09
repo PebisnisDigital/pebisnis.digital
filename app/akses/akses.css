@@ -4,7 +4,8 @@
 .akses-app button{border:0;background:transparent;color:inherit}
 .akses-topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;height:75px;padding:0 4.5vw;border-bottom:1px solid var(--aborder);background:rgba(255,255,255,.96);backdrop-filter:blur(14px)}
 .akses-wordmark{display:flex;align-items:center;gap:11px;color:#172c22;font-size:20px;font-weight:850;letter-spacing:-.07em;line-height:1}
-.akses-wordmark>span:last-child{display:flex;flex-direction:column;gap:4px}
+.akses-brand-group{display:flex;flex-direction:column;gap:4px}
+.akses-brand-name{white-space:nowrap}
 .akses-wordmark small{font-size:8px;letter-spacing:.24em;font-weight:780;color:#8b9690}
 .akses-brand-dot{color:#0b9960}
 .akses-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#07834f;color:white;font-family:Georgia,serif;font-size:31px;font-style:italic;font-weight:bold;letter-spacing:-.1em;box-shadow:0 5px 13px #0c8b5130}

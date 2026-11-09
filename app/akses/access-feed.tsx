@@ -48,7 +48,25 @@ function extractPillar(text: string): Pillar {
 }
 
 function cleanMaterial(text: string) {
-  return text.replace(/^\s*EPS\s+\d+\s*[·•—-]\s*(PIKIR|PEMBELI|PRODUK|SISTEM)\s*\n+/i, "").trim();
+  return text
+    .replace(/<\/?(?:b|i|strong|em|blockquote|p|br)(?:\s[^>]*)?\s*\/?>/gi, "")
+    .replace(/^\s*(?:EPS|DAY)\s+\d+\s*[·•—-]?\s*(PIKIR|PEMBELI|PRODUK|SISTEM)\s*\n+/i, "")
+    .replace(/\s*Save materi ini, karena akan terhapus 24 jam ke depan\.?/gi, "")
+    .trim();
+}
+
+function materialPresentation(parts: string[]) {
+  let title = "";
+  const sections = parts.map((part, index) => {
+    const blocks = cleanMaterial(part).split(/\n\s*\n/).map((block) => block.trim()).filter(Boolean);
+    // Older episodes used DAY/EPS as a separate heading, followed by the real title.
+    if (index === 0) {
+      while (blocks[0] && /^(?:EPS|DAY)\s+\d+\s*(?:[·•—-]\s*)?(?:PIKIR|PEMBELI|PRODUK|SISTEM)$/i.test(blocks[0])) blocks.shift();
+      title = blocks.shift() ?? "";
+    }
+    return index === 0 ? { heading: "", paragraphs: blocks } : { heading: blocks.shift() ?? "", paragraphs: blocks };
+  });
+  return { title, sections };
 }
 
 function initials(name: string) { return name.slice(0, 1).toUpperCase(); }
@@ -184,7 +202,7 @@ export function AccessFeed({ config }: { config: SupabasePublicConfig | null }) 
     }
     void loadDetails();
     return () => { alive = false; needed.forEach((post) => fetching.current.delete(post.id)); };
-  }, [status, config, displayed, materials]);
+  }, [status, config, displayed]);
 
   const toggleSaved = useCallback((day: number) => {
     setSaved((current) => {
@@ -208,7 +226,7 @@ export function AccessFeed({ config }: { config: SupabasePublicConfig | null }) 
   return (
     <div className="akses-app">
       <header className="akses-topbar">
-        <a href="/akses" className="akses-wordmark" aria-label="Beranda ruang belajar"><span className="akses-mark">p<span>.</span></span><span>pebisnis<span className="akses-brand-dot">.</span>digital<small>RUANG BELAJAR</small></span></a>
+        <a href="/akses" className="akses-wordmark" aria-label="Beranda ruang belajar"><span className="akses-mark">p<span>.</span></span><span className="akses-brand-group"><span className="akses-brand-name">pebisnis<span className="akses-brand-dot">.</span>digital</span><small>RUANG BELAJAR</small></span></a>
         <div className="akses-top-actions">
           <span className="akses-top-label">365 EPISODE • SATU LANGKAH SETIAP HARI</span>
           <a href="/dashboard" className="akses-top-avatar" title="Kembali ke dashboard admin">V</a>
@@ -254,19 +272,15 @@ export function AccessFeed({ config }: { config: SupabasePublicConfig | null }) 
             <section className="akses-post-list" aria-label="Materi pembelajaran">
               {displayed.map((post) => {
                 const parts = materials[post.id];
+                const presentation = parts ? materialPresentation(parts) : null;
                 const hasSaved = saved.includes(post.day);
                 return <article className="akses-post" key={post.id} id={`episode-${post.day}`}>
                   <div className="akses-post-top"><div className="akses-post-avatar">{initials(post.pillar)}</div><div className="akses-post-author"><strong>pebisnis.digital <span className="akses-verified">✓</span></strong><small>Episode {String(post.day).padStart(3, "0")} <span>·</span> {post.pillar}</small></div><span className="akses-post-more">✳</span></div>
                   {imageUrls[post.id] ? <div className="akses-post-image"><img src={imageUrls[post.id]} alt={`Ilustrasi materi ${post.title}`} loading={post.day > 2 ? "lazy" : "eager"} /></div> : <div className="akses-post-image akses-image-placeholder" style={{ background: PILLAR_META[post.pillar].color }}><span className="akses-placeholder-label">PEBISNIS DIGITAL</span><span className="akses-placeholder-star">✳</span><strong>{mediaErrors[post.id] ? "Gambar belum tersedia" : "Menyiapkan ilustrasi..."}</strong><small>EPS {String(post.day).padStart(3, "0")}</small></div>}
                   <div className="akses-post-inner"><div className="akses-post-actions"><div><button aria-label="Bagikan episode" title="Bagikan" onClick={() => void share(post.day)}><Icon name="share" /></button><span className="akses-post-tag">{post.pillar}</span></div><button onClick={() => toggleSaved(post.day)} title={hasSaved ? "Hapus dari tersimpan" : "Simpan materi"} aria-label={hasSaved ? "Hapus dari tersimpan" : "Simpan materi"}><Icon name={hasSaved ? "bookmark-filled" : "bookmark"} /></button></div>
                     <span className="akses-episode-label">MATERI {String(post.day).padStart(3, "0")} / {total}</span>
-                    <h3>{parts?.[0] ? (cleanMaterial(parts[0]).split(/\n\s*\n/)[0]?.trim() || post.title) : post.title}</h3>
-                    {!parts ? <div className="akses-material-loading"><span /><span /><span /></div> : <div className="akses-material">{parts.map((part, i) => {
-                      const content = cleanMaterial(part);
-                      const blocks = content.split(/\n\s*\n/).map((block) => block.trim()).filter(Boolean);
-                      if (i === 0 && blocks.length > 0) blocks.shift();
-                      return <section className="akses-material-section" key={i}>{i > 0 && blocks[0] && <h4>{blocks.shift()}</h4>}{blocks.map((block, k) => <p key={k}>{block}</p>)}</section>;
-                    })}</div>}
+                    <h3>{presentation?.title || post.title}</h3>
+                    {!presentation ? <div className="akses-material-loading"><span /><span /><span /></div> : <div className="akses-material">{presentation.sections.map((section, i) => <section className="akses-material-section" key={i}>{section.heading && <h4>{section.heading}</h4>}{section.paragraphs.map((block, k) => <p key={k}>{block}</p>)}</section>)}</div>}
                     <div className="akses-post-footer"><span>✦ Pelan-pelan, yang penting jalan.</span><span>EPS {post.day}</span></div>
                   </div>
                 </article>;
