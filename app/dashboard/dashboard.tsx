@@ -4,10 +4,12 @@ import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type { SupabasePublicConfig } from "../lib/config";
 import { getSupabase } from "../lib/supabase";
 import batch08 from "./batch08.json";
+import batch09 from "./batch09.json";
 import { makeEpisodeDoodleCard, type EpisodeVisual } from "./episode-visual";
 
 type BatchEpisode = EpisodeVisual & { caption: string; material: string };
 const BATCH_08_EPISODES = batch08.episodes as BatchEpisode[];
+const BATCH_09_EPISODES = batch09.episodes as BatchEpisode[];
 
 type Profile = { role: string; status: string; display_name: string | null };
 type Health = { status: string; job_count: number };
@@ -1039,8 +1041,8 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
   const [content365StartDate, setContent365StartDate] = useState(() => dateInputValueInTimeZone());
   const [content365Busy, setContent365Busy] = useState<string | null>(null);
   const [content365Message, setContent365Message] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [batch08Busy, setBatch08Busy] = useState(false);
-  const [batch08Progress, setBatch08Progress] = useState("");
+  const [batchImportBusy, setBatchImportBusy] = useState<number | null>(null);
+  const [batchImportProgress, setBatchImportProgress] = useState("");
   const [postBusy, setPostBusy] = useState(false);
   const [postMessage, setPostMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [postCategoryId, setPostCategoryId] = useState("");
@@ -2684,27 +2686,30 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
     }
   }
 
-  async function importBatch08() {
-    if (batch08Busy) return;
+  async function importCalendarBatch(batchNumber: 8 | 9) {
+    if (batchImportBusy) return;
+    const firstDay = (batchNumber - 1) * 30 + 1;
+    const lastDay = batchNumber * 30;
+    const episodes = batchNumber === 8 ? BATCH_08_EPISODES : BATCH_09_EPISODES;
     const confirmed = window.confirm(
-      "Isi 30 slot Bagian 8 (Hari 211–240) dengan naskah baru dan gambar doodle hitam-putih? " +
+      `Isi 30 slot Bagian ${batchNumber} (Hari ${firstDay}–${lastDay}) dengan naskah baru dan gambar doodle hitam-putih? ` +
       "Setiap slot akan berstatus Aktif dalam rotasi 06.00 WIB. Slot yang sudah berisi tidak akan ditimpa."
     );
     if (!confirmed) return;
 
-    setBatch08Busy(true);
-    setBatch08Progress("Memeriksa isi kalender dan draft yang sudah ada...");
+    setBatchImportBusy(batchNumber);
+    setBatchImportProgress("Memeriksa isi kalender dan draft yang sudah ada...");
     setContent365Message(null);
     let completed = 0;
     try {
       const supabase = getSupabase(config);
       const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) throw new Error("Sesi admin berakhir. Login kembali sebelum mengisi Bagian 8.");
+      if (authError || !user) throw new Error(`Sesi admin berakhir. Login kembali sebelum mengisi Bagian ${batchNumber}.`);
       const categoryId = categories.find((category) => category.status === "ACTIVE")?.id;
       if (!categoryId) throw new Error("Kategori materi aktif tidak tersedia.");
 
       const [slotsResponse, postsResponse] = await Promise.all([
-        supabase.from("content_365_items").select("day_number,source_post_id,status").gte("day_number", 211).lte("day_number", 240),
+        supabase.from("content_365_items").select("day_number,source_post_id,status").gte("day_number", firstDay).lte("day_number", lastDay),
         supabase.from("channel_posts").select("id,caption,prompts(title)").order("created_at", { ascending: false }).limit(500),
       ]);
       if (slotsResponse.error) throw slotsResponse.error;
@@ -2717,10 +2722,10 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
         caption: post.caption,
         title: Array.isArray(post.prompts) ? post.prompts[0]?.title : post.prompts?.title,
       }));
-      if (BATCH_08_EPISODES.length !== 30 || BATCH_08_EPISODES.some((episode, index) => episode.day !== index + 211)) {
-        throw new Error("Paket Bagian 8 tidak lengkap atau urutan harinya tidak sesuai.");
+      if (episodes.length !== 30 || episodes.some((episode, index) => episode.day !== index + firstDay)) {
+        throw new Error(`Paket Bagian ${batchNumber} tidak lengkap atau urutan harinya tidak sesuai.`);
       }
-      for (const episode of BATCH_08_EPISODES) {
+      for (const episode of episodes) {
         const title = `EPS ${episode.day} · ${episode.pillar}`;
         const priorPost = posts.find((post) => post.title === title);
         const slot = slots.get(episode.day);
@@ -2729,7 +2734,7 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
             throw new Error(`Hari ${episode.day} sudah berisi konten lain. Tidak ada data yang ditimpa.`);
           }
           completed += 1;
-          setBatch08Progress(`${completed}/30 — Hari ${episode.day} sudah sesuai, dilewati.`);
+          setBatchImportProgress(`${completed}/30 — Hari ${episode.day} sudah sesuai, dilewati.`);
           continue;
         }
         if (priorPost && priorPost.caption !== episode.caption) {
@@ -2738,7 +2743,7 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
 
         let postId = priorPost?.id;
         if (!postId) {
-          setBatch08Progress(`${completed + 1}/30 — Membuat visual EPS ${episode.day}...`);
+          setBatchImportProgress(`${completed + 1}/30 — Membuat visual EPS ${episode.day}...`);
           const imageFile = await makeEpisodeDoodleCard(episode);
           const imagePath = `${user.id}/${crypto.randomUUID()}.webp`;
           const { error: uploadError } = await supabase.storage.from("channel-post-images").upload(imagePath, imageFile, {
@@ -2783,7 +2788,7 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
           }
         }
 
-        setBatch08Progress(`${completed + 1}/30 — Menyimpan EPS ${episode.day} ke kalender...`);
+        setBatchImportProgress(`${completed + 1}/30 — Menyimpan EPS ${episode.day} ke kalender...`);
         const { data: assigned, error: assignError } = await supabase.rpc("admin_content_365_assign_post", {
           p_day_number: episode.day, p_source_post_id: postId, p_status: "ACTIVE",
         });
@@ -2794,14 +2799,14 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
         completed += 1;
       }
       await refreshContent365();
-      setContent365Page(7);
-      setContent365Message({ type: "success", text: "Bagian 8 selesai: 30 episode dan visual baru tersimpan di Hari 211–240 dengan status Aktif." });
-      setBatch08Progress("30/30 selesai dan terverifikasi.");
+      setContent365Page(batchNumber - 1);
+      setContent365Message({ type: "success", text: `Bagian ${batchNumber} selesai: 30 episode dan visual baru tersimpan di Hari ${firstDay}–${lastDay} dengan status Aktif.` });
+      setBatchImportProgress("30/30 selesai dan terverifikasi.");
     } catch (error) {
       await refreshContent365();
-      setContent365Message({ type: "error", text: `Bagian 8 terhenti pada ${completed}/30. ${error instanceof Error ? error.message : "Terjadi kesalahan."} Jalankan lagi untuk melanjutkan, bukan menimpa.` });
+      setContent365Message({ type: "error", text: `Bagian ${batchNumber} terhenti pada ${completed}/30. ${error instanceof Error ? error.message : "Terjadi kesalahan."} Jalankan lagi untuk melanjutkan, bukan menimpa.` });
     } finally {
-      setBatch08Busy(false);
+      setBatchImportBusy(null);
     }
   }
 
@@ -3658,11 +3663,12 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
         <div className="content365-heading">
           <div><p className="eyebrow">ROTASI FLEKSIBEL</p><h2 id="content365-calendar-title">Kalender {content365Duration} Hari</h2><p>Pilih satu materi untuk setiap hari. Setelah hari terakhir, konten bisa kembali ke Hari 1.</p></div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            {content365Duration >= 240 ? <button className="button secondary" type="button" onClick={() => void importBatch08()} disabled={batch08Busy || Boolean(content365Busy)}>{batch08Busy ? "Mengisi Bagian 8..." : "Isi Bagian 8"}</button> : null}
-            <button className="button secondary" type="button" onClick={() => refreshContent365(true)} disabled={content365Busy === "refresh" || batch08Busy}>{content365Busy === "refresh" ? "Memuat..." : "Segarkan"}</button>
+            {content365Duration >= 240 ? <button className="button secondary" type="button" onClick={() => void importCalendarBatch(8)} disabled={Boolean(batchImportBusy) || Boolean(content365Busy)}>{batchImportBusy === 8 ? "Mengisi Bagian 8..." : "Isi Bagian 8"}</button> : null}
+            {content365Duration >= 270 ? <button className="button secondary" type="button" onClick={() => void importCalendarBatch(9)} disabled={Boolean(batchImportBusy) || Boolean(content365Busy)}>{batchImportBusy === 9 ? "Mengisi Bagian 9..." : "Isi Bagian 9"}</button> : null}
+            <button className="button secondary" type="button" onClick={() => refreshContent365(true)} disabled={content365Busy === "refresh" || Boolean(batchImportBusy)}>{content365Busy === "refresh" ? "Memuat..." : "Segarkan"}</button>
           </div>
         </div>
-        {batch08Progress ? <p className="integration-result" role="status" aria-live="polite">{batch08Progress}</p> : null}
+        {batchImportProgress ? <p className="integration-result" role="status" aria-live="polite">{batchImportProgress}</p> : null}
         <div className="content365-summary">
           <article className={content365Settings?.enabled ? "is-active" : "is-paused"}><span>STATUS</span><strong>{content365Settings?.enabled ? "AKTIF" : "NONAKTIF"}</strong><small>{content365Settings?.enabled ? `Kirim ${content365SendTime} WIB` : "Tidak ada kiriman otomatis"}</small></article>
           <article><span>TERISI</span><strong>{content365ConfiguredCount}/{content365Duration}</strong><small>{content365Duration - content365ConfiguredCount} hari masih kosong</small></article>
