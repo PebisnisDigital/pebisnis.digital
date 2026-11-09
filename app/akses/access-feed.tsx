@@ -3,299 +3,311 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SupabasePublicConfig } from "../lib/config";
 import { getSupabase } from "../lib/supabase";
+import { makeEpisodeDoodleCard } from "../dashboard/episode-visual";
+import batch08 from "../dashboard/batch08.json";
+import batch09 from "../dashboard/batch09.json";
+import batch10 from "../dashboard/batch10.json";
+import batch11 from "../dashboard/batch11.json";
+import batch12 from "../dashboard/batch12.json";
+import batch13 from "../dashboard/batch13.json";
 
 type Pillar = "PIKIR" | "PEMBELI" | "PRODUK" | "SISTEM";
 type Filter = "SEMUA" | Pillar;
-type Status = "loading" | "ready" | "locked" | "error";
-
-type CalendarRow = { day_number: number; source_post_id: string; status: string };
-type SourceRow = {
-  id: string;
-  prompt_version_id: string;
-  image_path: string;
-  caption: string;
-  prompts: { title: string } | { title: string }[] | null;
-};
-type FeedPost = { id: string; day: number; pillar: Pillar; title: string; versionId: string; imagePath: string };
+type View = "grid" | "feed" | "saved";
+type Episode = { day: number; pillar: Pillar; title: string; parts: string[]; imagePath: string | null; hook?: string };
+type PublicRow = { day_number: number; pillar: string; title: string; parts: unknown; image_path: string | null };
 
 const PILLARS: Pillar[] = ["PIKIR", "PEMBELI", "PRODUK", "SISTEM"];
-const PILLAR_META: Record<Pillar, { color: string; description: string }> = {
-  PIKIR: { color: "#ffebba", description: "Pola pikir & keberanian memulai" },
-  PEMBELI: { color: "#f5d8dd", description: "Memahami orang yang kita bantu" },
-  PRODUK: { color: "#d7e9fd", description: "Membuat produk yang benar-benar berguna" },
-  SISTEM: { color: "#d9efce", description: "Membangun kebiasaan & sistem jualan" },
+const PILLAR_COLORS: Record<Pillar, string> = {
+  PIKIR: "#eab865", PEMBELI: "#df8e9b", PRODUK: "#9ac4eb", SISTEM: "#9fc38c",
 };
+const STATIC_EPISODES: Episode[] = [
+  ...batch08.episodes, ...batch09.episodes, ...batch10.episodes,
+  ...batch11.episodes, ...batch12.episodes, ...batch13.episodes,
+].map((item) => ({
+  day: item.day,
+  pillar: item.pillar as Pillar,
+  title: item.image_hook,
+  parts: [item.material],
+  imagePath: null,
+  hook: item.image_hook,
+}));
 
-function Icon({ name, size = 22 }: { name: "home" | "search" | "bookmark" | "bookmark-filled" | "grid" | "arrow" | "share" | "lock" | "layers" | "menu"; size?: number }) {
-  const common = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+function Icon({ name, size = 24 }: { name: "grid" | "bookmark" | "bookmark-filled" | "search" | "close" | "arrow" | "share" | "heart" | "list" | "chevron-left" | "chevron-right" | "check" | "more" | "home" | "copy"; size?: number }) {
+  const shape = { fill: "none", stroke: "currentColor", strokeWidth: 1.9, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   const paths: Record<typeof name, React.ReactNode> = {
-    home: <><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" /></>,
-    search: <><circle cx="10.7" cy="10.7" r="7.1" /><path d="m16 16 5 5" /></>,
+    grid: <><rect x="3" y="3" width="5" height="5" /><rect x="10" y="3" width="5" height="5" /><rect x="17" y="3" width="5" height="5" /><rect x="3" y="10" width="5" height="5" /><rect x="10" y="10" width="5" height="5" /><rect x="17" y="10" width="5" height="5" /><rect x="3" y="17" width="5" height="5" /><rect x="10" y="17" width="5" height="5" /><rect x="17" y="17" width="5" height="5" /></>,
     bookmark: <path d="M6 3.5h12a1 1 0 0 1 1 1V22l-7-4.7L5 22V4.5a1 1 0 0 1 1-1z" />,
     "bookmark-filled": <path d="M6 3.5h12a1 1 0 0 1 1 1V22l-7-4.7L5 22V4.5a1 1 0 0 1 1-1z" fill="currentColor" />,
-    grid: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>,
-    arrow: <><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></>,
+    search: <><circle cx="10.7" cy="10.7" r="7.1" /><path d="m16 16 5 5" /></>,
+    close: <path d="M5 5l14 14M19 5 5 19" />,
+    arrow: <><path d="M4 12h16" /><path d="m14 6 6 6-6 6" /></>,
     share: <><path d="M12 16V3" /><path d="m7 8 5-5 5 5" /><path d="M4 13v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" /></>,
-    lock: <><rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></>,
-    layers: <><path d="m12 3 9 5-9 5-9-5z" /><path d="m3 12 9 5 9-5M3 16l9 5 9-5" /></>,
-    menu: <><path d="M4 7h16M4 12h16M4 17h16" /></>,
+    heart: <path d="M20.8 5.7a5.3 5.3 0 0 0-7.5 0L12 7l-1.3-1.3a5.3 5.3 0 1 0-7.5 7.5L12 22l8.8-8.8a5.3 5.3 0 0 0 0-7.5z" />,
+    list: <><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M8 9h9M8 13h9M8 17h6" /></>,
+    "chevron-left": <path d="m15 18-6-6 6-6" />,
+    "chevron-right": <path d="m9 18 6-6-6-6" />,
+    check: <path d="m5 12 5 5L20 7" />,
+    more: <><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></>,
+    home: <><path d="m3 10 9-7 9 7v10H3z" /><path d="M9 21v-8h6v8" /></>,
+    copy: <><rect x="7" y="7" width="13" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h1" /></>,
   };
-  return <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" {...common}>{paths[name]}</svg>;
+  return <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" {...shape}>{paths[name]}</svg>;
 }
 
-function extractPillar(text: string): Pillar {
-  return PILLARS.find((pillar) => new RegExp(`\\b${pillar}\\b`, "i").test(text)) ?? "PIKIR";
+function normalizePillar(value: string): Pillar {
+  return PILLARS.find((name) => value.toUpperCase().includes(name)) ?? "PIKIR";
 }
 
-function cleanMaterial(text: string) {
-  return text
-    .replace(/<\/?(?:b|i|strong|em|blockquote|p|br)(?:\s[^>]*)?\s*\/?>/gi, "")
-    .replace(/^\s*(?:EPS|DAY)\s+\d+\s*[·•—-]?\s*(PIKIR|PEMBELI|PRODUK|SISTEM)\s*\n+/i, "")
-    .replace(/\s*Save materi ini, karena akan terhapus 24 jam ke depan\.?/gi, "")
-    .trim();
+function cleanText(text: string) {
+  return text.replace(/<\/?(?:b|i|strong|em|blockquote|p|br)(?:\s[^>]*)?\s*\/?>/gi, "")
+    .replace(/Save materi ini, karena akan terhapus 24 jam ke depan\.?/gi, "").trim();
 }
 
-function materialPresentation(parts: string[]) {
-  let title = "";
-  const sections = parts.map((part, index) => {
-    const blocks = cleanMaterial(part).split(/\n\s*\n/).map((block) => block.trim()).filter(Boolean);
-    // Older episodes used DAY/EPS as a separate heading, followed by the real title.
-    if (index === 0) {
-      while (blocks[0] && /^(?:EPS|DAY)\s+\d+\s*(?:[·•—-]\s*)?(?:PIKIR|PEMBELI|PRODUK|SISTEM)$/i.test(blocks[0])) blocks.shift();
-      title = blocks.shift() ?? "";
-    }
-    return index === 0 ? { heading: "", paragraphs: blocks } : { heading: blocks.shift() ?? "", paragraphs: blocks };
-  });
+function readMaterial(episode: Episode) {
+  const blocks = episode.parts.flatMap((part) => cleanText(part).split(/\n\s*---\s*\n|\n\s*\n\s*---\s*\n\s*\n/g))
+    .map((part) => part.trim()).filter(Boolean);
+  const firstLines = (blocks.shift() ?? "").split("\n").map((line) => line.trim()).filter(Boolean);
+  if (/^(EPS|DAY)\s+\d+/i.test(firstLines[0] ?? "")) firstLines.shift();
+  const title = firstLines.shift() || episode.title;
+  const sections: Array<{ heading: string; body: string }> = [];
+  if (firstLines.length) sections.push({ heading: "", body: firstLines.join("\n") });
+  for (const block of blocks) {
+    const lines = block.split("\n").map((line) => line.trim());
+    const heading = lines.shift() ?? "";
+    sections.push({ heading, body: lines.join("\n").trim() });
+  }
   return { title, sections };
 }
 
-function initials(name: string) { return name.slice(0, 1).toUpperCase(); }
+function BrandAvatar({ compact = false }: { compact?: boolean }) {
+  return <span className={compact ? "ig-avatar ig-avatar-small" : "ig-avatar"} aria-label="Logo Pebisnis Digital">
+    <span className="ig-logo-lines">✦ <b>PEBISNIS</b><strong>.DIGITAL</strong><span className="ig-logo-dots">•• ✳ ••</span></span>
+  </span>;
+}
 
 export function AccessFeed({ config }: { config: SupabasePublicConfig | null }) {
-  const [status, setStatus] = useState<Status>("loading");
-  const [statusText, setStatusText] = useState("");
-  const [posts, setPosts] = useState<FeedPost[]>([]);
-  const [total, setTotal] = useState(365);
-  const [query, setQuery] = useState("");
+  const [episodes, setEpisodes] = useState<Episode[]>(STATIC_EPISODES);
+  const [source, setSource] = useState<"static" | "loading" | "live">("loading");
   const [filter, setFilter] = useState<Filter>("SEMUA");
-  const [sort, setSort] = useState<"asc" | "desc">("asc");
-  const [visibleCount, setVisibleCount] = useState(8);
+  const [view, setView] = useState<View>("grid");
+  const [search, setSearch] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+  const [sort, setSort] = useState<"newest" | "oldest">("newest");
+  const [showCount, setShowCount] = useState(20);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [saved, setSaved] = useState<number[]>([]);
-  const [onlySaved, setOnlySaved] = useState(false);
-  const [materials, setMaterials] = useState<Record<string, string[]>>({});
-  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
-  const [mediaErrors, setMediaErrors] = useState<Record<string, boolean>>({});
-  const [notification, setNotification] = useState("");
-  const fetching = useRef(new Set<string>());
+  const [imageUrls, setImageUrls] = useState<Record<number, string>>({});
+  const [toast, setToast] = useState("");
+  const fetchingImages = useRef(new Set<number>());
+  const ownedUrls = useRef(new Set<string>());
+  const mounted = useRef(true);
 
   useEffect(() => {
     try {
-      const value = window.localStorage.getItem("pd-akses-bookmarks");
-      if (value) {
-        const parsed = JSON.parse(value) as unknown;
+      const raw = window.localStorage.getItem("pd-akses-bookmarks");
+      if (raw) {
+        const parsed = JSON.parse(raw) as unknown;
         if (Array.isArray(parsed)) setSaved(parsed.filter((n) => Number.isInteger(n) && n > 0));
       }
       const deepLink = new URLSearchParams(window.location.search).get("eps");
-      if (deepLink && /^\d{1,4}$/.test(deepLink)) setQuery(`EPS ${Number(deepLink)}`);
-    } catch { /* Storage may be unavailable in private browsing. */ }
+      if (deepLink && /^\d{1,4}$/.test(deepLink)) setSelectedDay(Number(deepLink));
+    } catch { /* Private browsing can block storage. */ }
   }, []);
 
   useEffect(() => {
-    if (!config) { setStatus("error"); setStatusText("Konfigurasi database belum tersedia."); return; }
+    if (!config) { setSource("static"); return; }
     let cancelled = false;
-    async function load() {
-      const supabase = getSupabase(config!);
-      try {
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (cancelled) return;
-        if (authError || !user) { setStatus("locked"); return; }
-        const { data: profile, error: profileError } = await supabase.from("admin_profiles")
-          .select("role,status").eq("auth_user_id", user.id).maybeSingle();
-        if (cancelled) return;
-        if (profileError || profile?.status !== "ACTIVE") { setStatus("locked"); return; }
-
-        const { data: slots, error: slotError } = await supabase.from("content_365_items")
-          .select("day_number,source_post_id,status").eq("status", "ACTIVE")
-          .order("day_number", { ascending: true }).limit(1200);
-        if (slotError) throw slotError;
-        const activeSlots = (slots ?? []) as CalendarRow[];
-        const ids = [...new Set(activeSlots.map((slot) => slot.source_post_id))];
-        const sourceRows: SourceRow[] = [];
-        for (let offset = 0; offset < ids.length; offset += 100) {
-          const { data, error } = await supabase.from("channel_posts")
-            .select("id,prompt_version_id,image_path,caption,prompts(title)")
-            .in("id", ids.slice(offset, offset + 100));
-          if (error) throw error;
-          sourceRows.push(...(data ?? []) as SourceRow[]);
-        }
-        if (cancelled) return;
-        const sources = new Map(sourceRows.map((row) => [row.id, row]));
-        const mapped: FeedPost[] = activeSlots.flatMap((slot) => {
-          const source = sources.get(slot.source_post_id);
-          if (!source) return [];
-          const title = Array.isArray(source.prompts) ? source.prompts[0]?.title : source.prompts?.title;
-          const pillar = extractPillar(`${title ?? ""} ${source.caption.split("\n")[0] ?? ""}`);
-          return [{ id: source.id, day: slot.day_number, pillar, title: title ?? `EPS ${slot.day_number} · ${pillar}`, versionId: source.prompt_version_id, imagePath: source.image_path }];
-        });
-        setPosts(mapped);
-        setTotal(Math.max(365, ...activeSlots.map((slot) => slot.day_number), 0));
-        setStatus("ready");
-      } catch (error) {
-        if (cancelled) return;
-        setStatus("error");
-        setStatusText(error instanceof Error ? error.message : "Materi belum bisa dimuat. Coba beberapa saat lagi.");
-      }
-    }
-    void load();
+    const supabase = getSupabase(config);
+    void Promise.resolve(supabase.rpc("public_akses_episodes")).then(({ data, error }) => {
+      if (cancelled) return;
+      if (error || !Array.isArray(data) || !data.length) { setSource("static"); return; }
+      const incoming = (data as PublicRow[]).map((row) => ({
+        day: row.day_number,
+        title: row.title,
+        pillar: normalizePillar(row.pillar),
+        parts: Array.isArray(row.parts) ? row.parts.filter((item): item is string => typeof item === "string") : [],
+        imagePath: row.image_path,
+        hook: STATIC_EPISODES.find((item) => item.day === row.day_number)?.hook,
+      }));
+      setEpisodes(incoming);
+      setSource("live");
+    }).catch(() => { if (!cancelled) setSource("static"); });
     return () => { cancelled = true; };
   }, [config]);
 
-  const filtered = useMemo(() => posts.filter((post) => {
-    const matchesPillar = filter === "SEMUA" || post.pillar === filter;
-    const matchesSaved = !onlySaved || saved.includes(post.day);
-    const normalized = query.toLowerCase().trim();
-    const matchesQuery = !normalized || post.title.toLowerCase().includes(normalized)
-      || String(post.day) === normalized || `eps ${post.day}`.includes(normalized);
-    return matchesPillar && matchesSaved && matchesQuery;
-  }).sort((a, b) => sort === "asc" ? a.day - b.day : b.day - a.day), [posts, filter, saved, onlySaved, query, sort]);
-  const displayed = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    const rows = episodes.filter((episode) => (
+      (filter === "SEMUA" || episode.pillar === filter)
+      && (view !== "saved" || saved.includes(episode.day))
+      && (!needle || String(episode.day) === needle || ("eps " + episode.day).includes(needle)
+        || episode.title.toLowerCase().includes(needle) || readMaterial(episode).title.toLowerCase().includes(needle))
+    ));
+    return rows.sort((a, b) => sort === "newest" ? b.day - a.day : a.day - b.day);
+  }, [episodes, filter, search, sort, saved, view]);
+  const visible = useMemo(() => filtered.slice(0, showCount), [filtered, showCount]);
+  const selected = episodes.find((episode) => episode.day === selectedDay) ?? null;
+  const selectedIndex = selected ? filtered.findIndex((episode) => episode.day === selected.day) : -1;
 
-  useEffect(() => { setVisibleCount(8); }, [filter, query, sort, onlySaved]);
+  useEffect(() => { setShowCount(20); }, [filter, search, view, sort]);
 
   useEffect(() => {
-    if (status !== "ready" || !config) return;
-    const needed = displayed.filter((post) => !materials[post.id] && !fetching.current.has(post.id));
-    if (!needed.length) return;
-    for (const post of needed) fetching.current.add(post.id);
-    let alive = true;
-    const supabase = getSupabase(config);
-    async function loadDetails() {
-      const ids = [...new Set(needed.map((post) => post.versionId))];
-      const { data, error } = await supabase.from("prompt_versions").select("id,parts").in("id", ids);
-      const byVersion = new Map((data ?? []).map((part) => [part.id, part.parts]));
-      const resolved: Record<string, string[]> = {};
-      const fallback = needed.filter((post) => error || !Array.isArray(byVersion.get(post.versionId)));
-      for (const post of needed) {
-        const value = byVersion.get(post.versionId);
-        if (!error && Array.isArray(value)) resolved[post.id] = value.filter((part): part is string => typeof part === "string");
+    if (source === "loading") return;
+    const targets = [...visible, ...(selected ? [selected] : [])].filter((episode) => !imageUrls[episode.day] && !fetchingImages.current.has(episode.day));
+    if (!targets.length) return;
+    for (const episode of targets) fetchingImages.current.add(episode.day);
+    const supabase = config ? getSupabase(config) : null;
+    async function resolveImage(episode: Episode) {
+      let url = "";
+      if (supabase && episode.imagePath && source === "live") {
+        const result = await supabase.storage.from("channel-post-images").createSignedUrl(episode.imagePath, 3600);
+        if (!result.error && result.data?.signedUrl) url = result.data.signedUrl;
       }
-      if (fallback.length) {
-        const results = await Promise.all(fallback.map(async (post) => {
-          const response = await supabase.rpc("admin_get_channel_post_for_edit", { p_post_id: post.id });
-          return { post, parts: (response.data as { parts?: unknown } | null)?.parts };
-        }));
-        for (const { post, parts } of results) {
-          if (Array.isArray(parts)) resolved[post.id] = parts.filter((part): part is string => typeof part === "string");
-        }
+      if (!url && episode.hook) {
+        const card = await makeEpisodeDoodleCard({ day: episode.day, pillar: episode.pillar, image_hook: episode.hook });
+        url = URL.createObjectURL(card);
+        ownedUrls.current.add(url);
       }
-      if (alive) {
-        setMaterials((current) => ({ ...current, ...resolved }));
-        if (Object.keys(resolved).length !== needed.length) setStatusText("Beberapa materi belum bisa dibaca. Coba muat ulang halaman.");
-      }
-      await Promise.all(needed.map(async (post) => {
-        const { data: signed, error: imageError } = await supabase.storage.from("channel-post-images").createSignedUrl(post.imagePath, 3600);
-        if (!alive) return;
-        if (imageError || !signed?.signedUrl) setMediaErrors((current) => ({ ...current, [post.id]: true }));
-        else setImageUrls((current) => ({ ...current, [post.id]: signed.signedUrl }));
-      }));
-      needed.forEach((post) => fetching.current.delete(post.id));
+      if (mounted.current && url) setImageUrls((current) => ({ ...current, [episode.day]: url }));
+      fetchingImages.current.delete(episode.day);
     }
-    void loadDetails();
-    return () => { alive = false; needed.forEach((post) => fetching.current.delete(post.id)); };
-  }, [status, config, displayed]);
+    void Promise.all(targets.map((episode) => resolveImage(episode).catch(() => { fetchingImages.current.delete(episode.day); })));
+  }, [config, imageUrls, selected, source, visible]);
+
+  useEffect(() => {
+    const owner = ownedUrls.current;
+    mounted.current = true;
+    return () => { mounted.current = false; for (const url of owner) URL.revokeObjectURL(url); };
+  }, []);
+
+  useEffect(() => {
+    if (selectedDay === null) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelectedDay(null);
+      if (event.key === "ArrowRight" && selectedIndex >= 0) setSelectedDay(filtered[Math.min(selectedIndex + 1, filtered.length - 1)]?.day ?? null);
+      if (event.key === "ArrowLeft" && selectedIndex >= 0) setSelectedDay(filtered[Math.max(selectedIndex - 1, 0)]?.day ?? null);
+    };
+    document.addEventListener("keydown", onKey);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = originalOverflow; };
+  }, [selectedDay, filtered, selectedIndex]);
 
   const toggleSaved = useCallback((day: number) => {
     setSaved((current) => {
       const next = current.includes(day) ? current.filter((n) => n !== day) : [...current, day];
-      try { window.localStorage.setItem("pd-akses-bookmarks", JSON.stringify(next)); } catch { /* Ignore blocked local storage. */ }
+      try { window.localStorage.setItem("pd-akses-bookmarks", JSON.stringify(next)); } catch { /* Ignore storage errors. */ }
       return next;
     });
   }, []);
 
   const share = useCallback(async (day: number) => {
-    const url = `${window.location.origin}/akses?eps=${day}`;
+    const url = window.location.origin + "/akses?eps=" + day;
     try {
-      if (navigator.share) await navigator.share({ title: `Pebisnis Digital · EPS ${day}`, url });
-      else { await navigator.clipboard.writeText(url); setNotification("Link episode disalin."); }
-    } catch { /* Sharing can be dismissed by the user. */ }
+      if (navigator.share) await navigator.share({ title: "Pebisnis Digital • EPS " + day, url });
+      else { await navigator.clipboard.writeText(url); setToast("Link episode disalin"); }
+    } catch { /* User may cancel sharing. */ }
   }, []);
 
-  const selectFilter = (next: Filter) => { setOnlySaved(false); setFilter(next); };
-  const activeCount = posts.length;
+  const showEpisode = (day: number) => {
+    setSelectedDay(day);
+    window.history.replaceState(null, "", "/akses?eps=" + day);
+  };
+  const closeEpisode = () => {
+    setSelectedDay(null);
+    window.history.replaceState(null, "", "/akses");
+  };
+  const focusSearch = () => {
+    setShowSearch(true);
+    requestAnimationFrame(() => document.getElementById("ig-search")?.focus());
+  };
+  const goGrid = () => { setView("grid"); document.getElementById("ig-posts")?.scrollIntoView({ behavior: "smooth" }); };
+  const material = selected ? readMaterial(selected) : null;
 
   return (
-    <div className="akses-app">
-      <header className="akses-topbar">
-        <a href="/akses" className="akses-wordmark" aria-label="Beranda ruang belajar"><span className="akses-mark">p<span>.</span></span><span className="akses-brand-group"><span className="akses-brand-name">pebisnis<span className="akses-brand-dot">.</span>digital</span><small>RUANG BELAJAR</small></span></a>
-        <div className="akses-top-actions">
-          <span className="akses-top-label">365 EPISODE • SATU LANGKAH SETIAP HARI</span>
-          <a href="/dashboard" className="akses-top-avatar" title="Kembali ke dashboard admin">V</a>
+    <div className="ig-akses">
+      <header className="ig-site-head">
+        <a href="/akses" className="ig-site-brand">pebisnis<span>.</span>digital <span className="ig-brand-star">✳</span></a>
+        <div className="ig-site-head-actions">
+          <button onClick={focusSearch} title="Cari materi" aria-label="Cari materi"><Icon name="search" /></button>
+          <button onClick={() => { setView("saved"); document.getElementById("ig-posts")?.scrollIntoView({ behavior: "smooth" }); }} title="Materi tersimpan" aria-label="Materi tersimpan"><Icon name="bookmark" /></button>
         </div>
       </header>
 
-      <div className="akses-body">
-        <aside className="akses-sidebar" aria-label="Navigasi ruang belajar">
-          <div className="akses-side-menu">
-            <button className={!onlySaved && filter === "SEMUA" ? "is-active" : ""} onClick={() => selectFilter("SEMUA")}><Icon name="home" /> <span>Beranda</span></button>
-            <button onClick={() => document.getElementById("akses-search")?.focus()}><Icon name="search" /> <span>Cari materi</span></button>
-            <button className={onlySaved ? "is-active" : ""} onClick={() => { setOnlySaved(true); setFilter("SEMUA"); }}><Icon name="bookmark" /> <span>Tersimpan</span></button>
-          </div>
-          <div className="akses-side-label">JELAJAHI PILAR</div>
-          <div className="akses-side-categories">
-            {PILLARS.map((pillar) => <button className={!onlySaved && filter === pillar ? "is-active" : ""} key={pillar} onClick={() => selectFilter(pillar)}><span className="akses-category-dot" style={{ background: PILLAR_META[pillar].color }} /> {pillar}</button>)}
-          </div>
-          <div className="akses-side-bottom"><span className="akses-side-bottom-icon">✳</span><strong>Belajar sedikit,<br />praktik sungguhan.</strong><p>Jangan cuma disimpan. Cobain satu langkah hari ini.</p></div>
-          <small className="akses-side-copyright">© PEBISNIS DIGITAL</small>
-        </aside>
-
-        <main className="akses-main">
-          <div className="akses-intro">
-            <div className="akses-welcome"><span className="akses-kicker"><span /> PERPUSTAKAAN DIGITAL</span><h1>Ilmu yang bisa<br /><em>langsung dipakai.</em></h1><p>Buka gambarnya, baca materinya, lalu praktik. Sesimpel itu.</p></div>
-            <div className="akses-progress-card"><span className="akses-progress-symbol">✦</span><strong>{status === "ready" ? activeCount : "365"}<small>EPISODE</small></strong><span className="akses-progress-caption">Bukan cuma buat dibaca.<br />Buat dikerjakan.</span></div>
-          </div>
-
-          {status === "loading" && <div className="akses-state-card" role="status"><div className="akses-spinner" /><h2>Menyiapkan ruang belajar...</h2><p>Sedang mengambil daftar episode dari kalender konten.</p></div>}
-
-          {status === "locked" && <div className="akses-state-card akses-locked" role="status"><span className="akses-state-icon"><Icon name="lock" size={28} /></span><span className="akses-kicker">AKSES KHUSUS</span><h2>Materinya ada.<br />Pintunya masih terkunci.</h2><p>Untuk sekarang, ruang belajar bisa dibuka oleh admin terdaftar. Akses pembeli akan dihubungkan ke pesanan yang sudah terverifikasi.</p><a className="akses-primary" href="/login">Masuk Admin <Icon name="arrow" size={18} /></a><small>Sudah login? Muat ulang halaman ini.</small></div>}
-
-          {status === "error" && <div className="akses-state-card" role="alert"><span className="akses-state-icon">!</span><h2>Waduh, materinya belum muncul.</h2><p>{statusText || "Coba buka lagi beberapa saat."}</p><button className="akses-primary" onClick={() => window.location.reload()}>Coba Lagi <Icon name="arrow" size={18} /></button></div>}
-
-          {status === "ready" && <>
-            <div className="akses-controls">
-              <div className="akses-search-wrap"><Icon name="search" size={19} /><input id="akses-search" type="search" placeholder="Cari EPS atau topik..." value={query} onChange={(event) => setQuery(event.target.value)} autoComplete="off" /><kbd>⌕</kbd></div>
-              <button className="akses-sort" onClick={() => setSort(sort === "asc" ? "desc" : "asc")} aria-label="Ubah urutan episode">{sort === "asc" ? "EPS 1 → 365" : "EPS 365 → 1"} <span>↕</span></button>
+      <main>
+        <section className="ig-profile" aria-label="Profil Pebisnis Digital">
+          <div className="ig-profile-photo"><BrandAvatar /></div>
+          <div className="ig-profile-info">
+            <div className="ig-name-row"><h1>pebisnis.digital</h1><span className="ig-verified" title="Pebisnis Digital"><Icon name="check" size={13} /></span><span className="ig-name-icon">✳</span></div>
+            <div className="ig-stats">
+              <span><b>{source === "live" ? episodes.length : 365}</b> postingan</span>
+              <span><b>4</b> pilar belajar</span>
+              <span><b>Gratis</b> dibaca</span>
             </div>
-            <div className="akses-pill-row" role="group" aria-label="Filter pilar materi"><button className={!onlySaved && filter === "SEMUA" ? "selected" : ""} onClick={() => selectFilter("SEMUA")}>✳ Semua</button>{PILLARS.map((pillar) => <button key={pillar} className={!onlySaved && filter === pillar ? "selected" : ""} onClick={() => selectFilter(pillar)}>{pillar}</button>)}<button className={onlySaved ? "selected" : ""} onClick={() => { setOnlySaved(true); setFilter("SEMUA"); }}>☆ Tersimpan</button></div>
-            <div className="akses-feed-heading"><div><span className="akses-feed-eyebrow">{onlySaved ? "KOLEKSI PRIBADI" : filter === "SEMUA" ? "UNTUK KAMU" : `PILAR ${filter}`}</span><h2>{onlySaved ? "Disimpan untuk nanti" : filter === "SEMUA" ? "Mulai dari satu langkah" : PILLAR_META[filter].description}</h2></div><span>{filtered.length} materi</span></div>
-            {statusText && <p className="akses-inline-note" role="status">{statusText}</p>}
-            {notification && <div className="akses-toast" role="status" onClick={() => setNotification("")}>{notification} ×</div>}
-            <section className="akses-post-list" aria-label="Materi pembelajaran">
-              {displayed.map((post) => {
-                const parts = materials[post.id];
-                const presentation = parts ? materialPresentation(parts) : null;
-                const hasSaved = saved.includes(post.day);
-                return <article className="akses-post" key={post.id} id={`episode-${post.day}`}>
-                  <div className="akses-post-top"><div className="akses-post-avatar">{initials(post.pillar)}</div><div className="akses-post-author"><strong>pebisnis.digital <span className="akses-verified">✓</span></strong><small>Episode {String(post.day).padStart(3, "0")} <span>·</span> {post.pillar}</small></div><span className="akses-post-more">✳</span></div>
-                  {imageUrls[post.id] ? <div className="akses-post-image"><img src={imageUrls[post.id]} alt={`Ilustrasi materi ${post.title}`} loading={post.day > 2 ? "lazy" : "eager"} /></div> : <div className="akses-post-image akses-image-placeholder" style={{ background: PILLAR_META[post.pillar].color }}><span className="akses-placeholder-label">PEBISNIS DIGITAL</span><span className="akses-placeholder-star">✳</span><strong>{mediaErrors[post.id] ? "Gambar belum tersedia" : "Menyiapkan ilustrasi..."}</strong><small>EPS {String(post.day).padStart(3, "0")}</small></div>}
-                  <div className="akses-post-inner"><div className="akses-post-actions"><div><button aria-label="Bagikan episode" title="Bagikan" onClick={() => void share(post.day)}><Icon name="share" /></button><span className="akses-post-tag">{post.pillar}</span></div><button onClick={() => toggleSaved(post.day)} title={hasSaved ? "Hapus dari tersimpan" : "Simpan materi"} aria-label={hasSaved ? "Hapus dari tersimpan" : "Simpan materi"}><Icon name={hasSaved ? "bookmark-filled" : "bookmark"} /></button></div>
-                    <span className="akses-episode-label">MATERI {String(post.day).padStart(3, "0")} / {total}</span>
-                    <h3>{presentation?.title || post.title}</h3>
-                    {!presentation ? <div className="akses-material-loading"><span /><span /><span /></div> : <div className="akses-material">{presentation.sections.map((section, i) => <section className="akses-material-section" key={i}>{section.heading && <h4>{section.heading}</h4>}{section.paragraphs.map((block, k) => <p key={k}>{block}</p>)}</section>)}</div>}
-                    <div className="akses-post-footer"><span>✦ Pelan-pelan, yang penting jalan.</span><span>EPS {post.day}</span></div>
-                  </div>
-                </article>;
-              })}
-            </section>
-            {!filtered.length && <div className="akses-empty"><Icon name="search" size={32} /><h3>Belum ketemu, Teh.</h3><p>Coba cari nomor episode, atau pilih pilar lain.</p><button onClick={() => { setQuery(""); setOnlySaved(false); setFilter("SEMUA"); }}>Lihat semua materi</button></div>}
-            {filtered.length > visibleCount && <button className="akses-load-more" onClick={() => setVisibleCount((count) => count + 8)}>Muat 8 episode lagi <Icon name="arrow" size={18} /></button>}
-            {filtered.length > 0 && <p className="akses-list-count">Menampilkan {Math.min(visibleCount, filtered.length)} dari {filtered.length} materi • Simpan yang mau kamu praktikkan</p>}
-          </>}
-        </main>
+            <div className="ig-bio">
+              <strong>PEBISNIS DIGITAL</strong>
+              <span className="ig-bio-muted">Education &amp; Digital Creator</span>
+              <p>Belajar bikin usaha sendiri di era AI. ✨<br />Dari ide, bikin produk, sampai berani jualan.<br />Nggak harus jago teknologi. Yang penting mulai!<br />👇 Semua materinya ada di sini.</p>
+              <span className="ig-bio-link">✳ #PebisnisDigital</span>
+            </div>
+            <div className="ig-profile-actions">
+              <button onClick={goGrid}>Lihat semua materi</button>
+              <button onClick={focusSearch}>Cari episode <Icon name="search" size={17} /></button>
+            </div>
+          </div>
+        </section>
 
-        <aside className="akses-rightbar" aria-label="Informasi ruang belajar"><div className="akses-right-head"><span className="akses-right-icon">✳</span><div><strong>RUANG BELAJAR</strong><small>Pebisnis Digital</small></div><span>AKTIF</span></div><div className="akses-right-divider" /><div className="akses-right-highlight"><span>BUKAN SEKADAR KONTEN</span><h2>Satu ide.<br />Satu aksi.<br /><em>Setiap hari.</em></h2><p>Nggak harus jago teknologi dulu. Mulai dari apa yang bisa kamu kerjakan hari ini.</p><div className="akses-right-decor">✦</div></div><div className="akses-right-section"><strong>4 PILAR UTAMA</strong>{PILLARS.map((pillar, index) => <button key={pillar} onClick={() => selectFilter(pillar)}><span style={{ background: PILLAR_META[pillar].color }}>0{index + 1}</span><div><b>{pillar}</b><small>{PILLAR_META[pillar].description}</small></div><span>↗</span></button>)}</div><p className="akses-right-foot">© 2026 Pebisnis Digital.<br />Materi untuk pembelajaran pribadi.</p></aside>
-      </div>
+        <section className="ig-highlights" aria-label="Kategori materi">
+          <button className={filter === "SEMUA" ? "ig-highlight active" : "ig-highlight"} onClick={() => setFilter("SEMUA")}><span className="ig-highlight-ring"><span className="ig-highlight-icon">✦</span></span><strong>Semua EPS</strong></button>
+          {PILLARS.map((pillar) => <button className={filter === pillar ? "ig-highlight active" : "ig-highlight"} key={pillar} onClick={() => setFilter(pillar)}><span className="ig-highlight-ring"><span className="ig-highlight-icon" style={{ color: PILLAR_COLORS[pillar] }}>{pillar === "PIKIR" ? "✳" : pillar === "PEMBELI" ? "♡" : pillar === "PRODUK" ? "◇" : "↗"}</span></span><strong>{pillar[0] + pillar.slice(1).toLowerCase()}</strong></button>)}
+        </section>
 
-      <nav className="akses-mobile-nav" aria-label="Navigasi bawah"><button className={!onlySaved && filter === "SEMUA" ? "active" : ""} onClick={() => selectFilter("SEMUA")}><Icon name="home" /><span>Beranda</span></button><button onClick={() => document.getElementById("akses-search")?.focus()}><Icon name="search" /><span>Cari</span></button><button className={onlySaved ? "active" : ""} onClick={() => { setOnlySaved(true); setFilter("SEMUA"); }}><Icon name="bookmark" /><span>Tersimpan</span></button><a href="/dashboard"><Icon name="grid" /><span>Admin</span></a></nav>
+        <section id="ig-posts" className="ig-collection" aria-label="Semua materi dan episode">
+          <div className="ig-tabs" role="tablist" aria-label="Tampilan materi">
+            <button role="tab" aria-selected={view === "grid"} className={view === "grid" ? "selected" : ""} onClick={() => setView("grid")} title="Grid"><Icon name="grid" size={22} /><span>POSTINGAN</span></button>
+            <button role="tab" aria-selected={view === "feed"} className={view === "feed" ? "selected" : ""} onClick={() => setView("feed")} title="Daftar"><Icon name="list" size={22} /><span>DAFTAR</span></button>
+            <button role="tab" aria-selected={view === "saved"} className={view === "saved" ? "selected" : ""} onClick={() => setView("saved")} title="Tersimpan"><Icon name="bookmark" size={22} /><span>TERSIMPAN</span></button>
+            <button role="tab" aria-selected={false} onClick={() => setSort((current) => current === "newest" ? "oldest" : "newest")} title="Ubah urutan"><Icon name="arrow" size={22} /><span>{sort === "newest" ? "TERBARU" : "TERLAMA"}</span></button>
+            <button role="tab" aria-selected={showSearch} onClick={focusSearch} title="Cari"><Icon name="search" size={22} /><span>CARI</span></button>
+          </div>
+
+          {showSearch && <div className="ig-search-line"><Icon name="search" size={20} /><input id="ig-search" type="search" placeholder="Cari EPS, judul, atau topik..." value={search} onChange={(event) => setSearch(event.target.value)} /><button onClick={() => { setSearch(""); setShowSearch(false); }} title="Tutup pencarian"><Icon name="close" size={18} /></button></div>}
+          <div className="ig-count-row"><span>{view === "saved" ? "Materi tersimpan" : filter === "SEMUA" ? "Semua postingan" : "Pilar " + filter}</span><span>{filtered.length} episode</span></div>
+
+          <div className={view === "feed" ? "ig-photo-grid ig-photo-list" : "ig-photo-grid"}>
+            {visible.map((episode) => <button className="ig-tile" key={episode.day} onClick={() => showEpisode(episode.day)} aria-label={"Baca materi EPS " + episode.day + ": " + episode.title}>
+              {imageUrls[episode.day] ? <img src={imageUrls[episode.day]} alt={"Ilustrasi EPS " + episode.day} loading="lazy" /> : <span className="ig-tile-fallback"><small>PEBISNIS.DIGITAL</small><b>{episode.hook || episode.title}</b><em>EPS {String(episode.day).padStart(3, "0")}</em></span>}
+              <span className="ig-tile-shade"><strong><Icon name="heart" size={18} /> EPS {String(episode.day).padStart(3, "0")}</strong><small>Buka materi</small></span>
+              <span className="ig-tile-number">{String(episode.day).padStart(3, "0")}</span>
+            </button>)}
+          </div>
+
+          {source !== "live" && <div className="ig-sync-note" role="status"><span>✦</span><p><b>{episodes.length} episode bisa dibaca sekarang.</b> Arsip sisanya menunggu sambungan baca publik ke kalender. Pengunjung tetap tidak perlu login.</p></div>}
+          {!filtered.length && <div className="ig-empty"><Icon name="search" size={32} /><h2>Belum ada di sini.</h2><p>Coba cari episode lain atau pilih kategori berbeda.</p><button onClick={() => { setFilter("SEMUA"); setSearch(""); setView("grid"); }}>Lihat Semua</button></div>}
+          {filtered.length > showCount && <button className="ig-more" onClick={() => setShowCount((count) => count + 20)}>Muat postingan lagi <Icon name="arrow" size={17} /></button>}
+          <p className="ig-footer">© {new Date().getFullYear()} Pebisnis Digital · Belajar, praktik, lanjut lagi.</p>
+        </section>
+      </main>
+
+      <nav className="ig-mobile-nav" aria-label="Navigasi cepat"><button onClick={() => { setFilter("SEMUA"); setView("grid"); window.scrollTo({ top: 0, behavior: "smooth" }); }} aria-label="Beranda"><Icon name="home" /></button><button onClick={focusSearch} aria-label="Cari"><Icon name="search" /></button><button onClick={goGrid} aria-label="Postingan"><Icon name="grid" /></button><button onClick={() => { setView("saved"); document.getElementById("ig-posts")?.scrollIntoView({ behavior: "smooth" }); }} aria-label="Tersimpan"><Icon name="bookmark" /></button><button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Profil"><BrandAvatar compact /></button></nav>
+
+      {selected && material && <div className="ig-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeEpisode(); }}>
+        <button className="ig-modal-close" onClick={closeEpisode} aria-label="Tutup"><Icon name="close" size={29} /></button>
+        {selectedIndex > 0 && <button className="ig-prev" onClick={() => setSelectedDay(filtered[selectedIndex - 1].day)} aria-label="Episode sebelumnya"><Icon name="chevron-left" /></button>}
+        <article className="ig-modal" role="dialog" aria-modal="true" aria-label={"Materi EPS " + selected.day}>
+          <div className="ig-modal-media">
+            {imageUrls[selected.day] ? <img src={imageUrls[selected.day]} alt={"Gambar EPS " + selected.day} /> : <span className="ig-modal-placeholder"><span>PEBISNIS.DIGITAL</span><strong>{selected.hook || material.title}</strong><small>EPS {selected.day}</small></span>}
+          </div>
+          <div className="ig-modal-content">
+            <div className="ig-modal-author"><BrandAvatar compact /><div><strong>pebisnis.digital <span className="ig-verified ig-verified-small"><Icon name="check" size={10} /></span></strong><small>EPS {String(selected.day).padStart(3, "0")} · {selected.pillar}</small></div><button onClick={() => void share(selected.day)} aria-label="Bagikan"><Icon name="more" /></button></div>
+            <div className="ig-modal-reading"><span className="ig-episode-label">EPISODE {String(selected.day).padStart(3, "0")} / 365 <span>·</span> {selected.pillar}</span><h2>{material.title}</h2>{material.sections.map((section, index) => <section className="ig-section" key={index}>{section.heading && <h3>{section.heading}</h3>}{section.body && <p>{section.body}</p>}</section>)}<div className="ig-reading-signoff">✳ Simpan ilmunya. Praktikkan langkahnya.</div></div>
+            <div className="ig-modal-bottom"><div className="ig-modal-tools"><button onClick={() => toggleSaved(selected.day)} aria-label={saved.includes(selected.day) ? "Hapus simpan" : "Simpan materi"} title="Simpan">{<Icon name={saved.includes(selected.day) ? "bookmark-filled" : "bookmark"} />}</button><button onClick={() => void share(selected.day)} aria-label="Bagikan" title="Bagikan"><Icon name="share" /></button><button onClick={() => { void navigator.clipboard.writeText(material.title + "\n\n" + material.sections.map((section) => section.heading + "\n" + section.body).join("\n\n")).then(() => setToast("Materi disalin")); }} aria-label="Salin materi" title="Salin materi"><Icon name="copy" /></button></div><span>{saved.includes(selected.day) ? "Tersimpan ✓" : "Materi gratis • Tanpa komentar"}</span></div>
+          </div>
+        </article>
+        {selectedIndex >= 0 && selectedIndex < filtered.length - 1 && <button className="ig-next" onClick={() => setSelectedDay(filtered[selectedIndex + 1].day)} aria-label="Episode selanjutnya"><Icon name="chevron-right" /></button>}
+      </div>}
+      {toast && <button className="ig-toast" onClick={() => setToast("")} role="status">{toast} ×</button>}
     </div>
   );
 }

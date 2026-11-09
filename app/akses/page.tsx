@@ -7,9 +7,8 @@ import "./akses.css";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Ruang Belajar · Pebisnis Digital",
-  description: "Jelajahi episode dan materi belajar Pebisnis Digital dalam satu feed.",
-  robots: { index: false, follow: false },
+  title: "365 Materi Gratis · Pebisnis Digital",
+  description: "Buka gambar dan baca langsung materi Pebisnis Digital, tanpa login dan tanpa harus komentar. Belajar bikin usaha di era AI, satu episode setiap hari.",
 };
 
 export default function AksesPage() {
