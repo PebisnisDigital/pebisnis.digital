@@ -8,6 +8,7 @@ import batch09 from "./batch09.json";
 import batch10 from "./batch10.json";
 import batch11 from "./batch11.json";
 import batch12 from "./batch12.json";
+import batch13 from "./batch13.json";
 import { makeEpisodeDoodleCard, type EpisodeVisual } from "./episode-visual";
 
 type BatchEpisode = EpisodeVisual & { caption: string; material: string };
@@ -16,6 +17,7 @@ const BATCH_09_EPISODES = batch09.episodes as BatchEpisode[];
 const BATCH_10_EPISODES = batch10.episodes as BatchEpisode[];
 const BATCH_11_EPISODES = batch11.episodes as BatchEpisode[];
 const BATCH_12_EPISODES = batch12.episodes as BatchEpisode[];
+const BATCH_13_EPISODES = batch13.episodes as BatchEpisode[];
 
 type Profile = { role: string; status: string; display_name: string | null };
 type Health = { status: string; job_count: number };
@@ -2692,13 +2694,14 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
     }
   }
 
-  async function importCalendarBatch(batchNumber: 8 | 9 | 10 | 11 | 12) {
+  async function importCalendarBatch(batchNumber: 8 | 9 | 10 | 11 | 12 | 13) {
     if (batchImportBusy) return;
     const firstDay = (batchNumber - 1) * 30 + 1;
-    const lastDay = batchNumber * 30;
-    const episodes = batchNumber === 8 ? BATCH_08_EPISODES : batchNumber === 9 ? BATCH_09_EPISODES : batchNumber === 10 ? BATCH_10_EPISODES : batchNumber === 11 ? BATCH_11_EPISODES : BATCH_12_EPISODES;
+    const lastDay = Math.min(batchNumber * 30, 365);
+    const expectedCount = lastDay - firstDay + 1;
+    const episodes = batchNumber === 8 ? BATCH_08_EPISODES : batchNumber === 9 ? BATCH_09_EPISODES : batchNumber === 10 ? BATCH_10_EPISODES : batchNumber === 11 ? BATCH_11_EPISODES : batchNumber === 12 ? BATCH_12_EPISODES : BATCH_13_EPISODES;
     const confirmed = window.confirm(
-      `Isi 30 slot Bagian ${batchNumber} (Hari ${firstDay}–${lastDay}) dengan naskah baru dan gambar doodle hitam-putih? ` +
+      `Isi ${expectedCount} slot Bagian ${batchNumber} (Hari ${firstDay}–${lastDay}) dengan naskah baru dan gambar doodle hitam-putih? ` +
       "Setiap slot akan berstatus Aktif dalam rotasi 06.00 WIB. Slot yang sudah berisi tidak akan ditimpa."
     );
     if (!confirmed) return;
@@ -2728,7 +2731,7 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
         caption: post.caption,
         title: Array.isArray(post.prompts) ? post.prompts[0]?.title : post.prompts?.title,
       }));
-      if (episodes.length !== 30 || episodes.some((episode, index) => episode.day !== index + firstDay)) {
+      if (episodes.length !== expectedCount || episodes.some((episode, index) => episode.day !== index + firstDay)) {
         throw new Error(`Paket Bagian ${batchNumber} tidak lengkap atau urutan harinya tidak sesuai.`);
       }
       for (const episode of episodes) {
@@ -2740,7 +2743,7 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
             throw new Error(`Hari ${episode.day} sudah berisi konten lain. Tidak ada data yang ditimpa.`);
           }
           completed += 1;
-          setBatchImportProgress(`${completed}/30 — Hari ${episode.day} sudah sesuai, dilewati.`);
+          setBatchImportProgress(`${completed}/${expectedCount} — Hari ${episode.day} sudah sesuai, dilewati.`);
           continue;
         }
         if (priorPost && priorPost.caption !== episode.caption) {
@@ -2749,7 +2752,7 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
 
         let postId = priorPost?.id;
         if (!postId) {
-          setBatchImportProgress(`${completed + 1}/30 — Membuat visual EPS ${episode.day}...`);
+          setBatchImportProgress(`${completed + 1}/${expectedCount} — Membuat visual EPS ${episode.day}...`);
           const imageFile = await makeEpisodeDoodleCard(episode);
           const imagePath = `${user.id}/${crypto.randomUUID()}.webp`;
           const { error: uploadError } = await supabase.storage.from("channel-post-images").upload(imagePath, imageFile, {
@@ -2794,7 +2797,7 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
           }
         }
 
-        setBatchImportProgress(`${completed + 1}/30 — Menyimpan EPS ${episode.day} ke kalender...`);
+        setBatchImportProgress(`${completed + 1}/${expectedCount} — Menyimpan EPS ${episode.day} ke kalender...`);
         const { data: assigned, error: assignError } = await supabase.rpc("admin_content_365_assign_post", {
           p_day_number: episode.day, p_source_post_id: postId, p_status: "ACTIVE",
         });
@@ -2806,11 +2809,11 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
       }
       await refreshContent365();
       setContent365Page(batchNumber - 1);
-      setContent365Message({ type: "success", text: `Bagian ${batchNumber} selesai: 30 episode dan visual baru tersimpan di Hari ${firstDay}–${lastDay} dengan status Aktif.` });
-      setBatchImportProgress("30/30 selesai dan terverifikasi.");
+      setContent365Message({ type: "success", text: `Bagian ${batchNumber} selesai: ${expectedCount} episode dan visual baru tersimpan di Hari ${firstDay}–${lastDay} dengan status Aktif.` });
+      setBatchImportProgress(`${expectedCount}/${expectedCount} selesai dan terverifikasi.`);
     } catch (error) {
       await refreshContent365();
-      setContent365Message({ type: "error", text: `Bagian ${batchNumber} terhenti pada ${completed}/30. ${error instanceof Error ? error.message : "Terjadi kesalahan."} Jalankan lagi untuk melanjutkan, bukan menimpa.` });
+      setContent365Message({ type: "error", text: `Bagian ${batchNumber} terhenti pada ${completed}/${expectedCount}. ${error instanceof Error ? error.message : "Terjadi kesalahan."} Jalankan lagi untuk melanjutkan, bukan menimpa.` });
     } finally {
       setBatchImportBusy(null);
     }
@@ -3674,6 +3677,7 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
             {content365Duration >= 300 ? <button className="button secondary" type="button" onClick={() => void importCalendarBatch(10)} disabled={Boolean(batchImportBusy) || Boolean(content365Busy)}>{batchImportBusy === 10 ? "Mengisi Bagian 10..." : "Isi Bagian 10"}</button> : null}
             {content365Duration >= 330 ? <button className="button secondary" type="button" onClick={() => void importCalendarBatch(11)} disabled={Boolean(batchImportBusy) || Boolean(content365Busy)}>{batchImportBusy === 11 ? "Mengisi Bagian 11..." : "Isi Bagian 11"}</button> : null}
             {content365Duration >= 360 ? <button className="button secondary" type="button" onClick={() => void importCalendarBatch(12)} disabled={Boolean(batchImportBusy) || Boolean(content365Busy)}>{batchImportBusy === 12 ? "Mengisi Bagian 12..." : "Isi Bagian 12"}</button> : null}
+            {content365Duration >= 365 ? <button className="button secondary" type="button" onClick={() => void importCalendarBatch(13)} disabled={Boolean(batchImportBusy) || Boolean(content365Busy)}>{batchImportBusy === 13 ? "Mengisi Bagian 13..." : "Isi Bagian 13"}</button> : null}
             <button className="button secondary" type="button" onClick={() => refreshContent365(true)} disabled={content365Busy === "refresh" || Boolean(batchImportBusy)}>{content365Busy === "refresh" ? "Memuat..." : "Segarkan"}</button>
           </div>
         </div>
