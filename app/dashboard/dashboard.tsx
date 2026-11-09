@@ -7,6 +7,7 @@ import batch08 from "./batch08.json";
 import batch09 from "./batch09.json";
 import batch10 from "./batch10.json";
 import batch11 from "./batch11.json";
+import batch12 from "./batch12.json";
 import { makeEpisodeDoodleCard, type EpisodeVisual } from "./episode-visual";
 
 type BatchEpisode = EpisodeVisual & { caption: string; material: string };
@@ -14,6 +15,7 @@ const BATCH_08_EPISODES = batch08.episodes as BatchEpisode[];
 const BATCH_09_EPISODES = batch09.episodes as BatchEpisode[];
 const BATCH_10_EPISODES = batch10.episodes as BatchEpisode[];
 const BATCH_11_EPISODES = batch11.episodes as BatchEpisode[];
+const BATCH_12_EPISODES = batch12.episodes as BatchEpisode[];
 
 type Profile = { role: string; status: string; display_name: string | null };
 type Health = { status: string; job_count: number };
@@ -2690,11 +2692,11 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
     }
   }
 
-  async function importCalendarBatch(batchNumber: 8 | 9 | 10 | 11) {
+  async function importCalendarBatch(batchNumber: 8 | 9 | 10 | 11 | 12) {
     if (batchImportBusy) return;
     const firstDay = (batchNumber - 1) * 30 + 1;
     const lastDay = batchNumber * 30;
-    const episodes = batchNumber === 8 ? BATCH_08_EPISODES : batchNumber === 9 ? BATCH_09_EPISODES : batchNumber === 10 ? BATCH_10_EPISODES : BATCH_11_EPISODES;
+    const episodes = batchNumber === 8 ? BATCH_08_EPISODES : batchNumber === 9 ? BATCH_09_EPISODES : batchNumber === 10 ? BATCH_10_EPISODES : batchNumber === 11 ? BATCH_11_EPISODES : BATCH_12_EPISODES;
     const confirmed = window.confirm(
       `Isi 30 slot Bagian ${batchNumber} (Hari ${firstDay}–${lastDay}) dengan naskah baru dan gambar doodle hitam-putih? ` +
       "Setiap slot akan berstatus Aktif dalam rotasi 06.00 WIB. Slot yang sudah berisi tidak akan ditimpa."
@@ -3671,6 +3673,7 @@ export function Dashboard({ config }: { config: SupabasePublicConfig }) {
             {content365Duration >= 270 ? <button className="button secondary" type="button" onClick={() => void importCalendarBatch(9)} disabled={Boolean(batchImportBusy) || Boolean(content365Busy)}>{batchImportBusy === 9 ? "Mengisi Bagian 9..." : "Isi Bagian 9"}</button> : null}
             {content365Duration >= 300 ? <button className="button secondary" type="button" onClick={() => void importCalendarBatch(10)} disabled={Boolean(batchImportBusy) || Boolean(content365Busy)}>{batchImportBusy === 10 ? "Mengisi Bagian 10..." : "Isi Bagian 10"}</button> : null}
             {content365Duration >= 330 ? <button className="button secondary" type="button" onClick={() => void importCalendarBatch(11)} disabled={Boolean(batchImportBusy) || Boolean(content365Busy)}>{batchImportBusy === 11 ? "Mengisi Bagian 11..." : "Isi Bagian 11"}</button> : null}
+            {content365Duration >= 360 ? <button className="button secondary" type="button" onClick={() => void importCalendarBatch(12)} disabled={Boolean(batchImportBusy) || Boolean(content365Busy)}>{batchImportBusy === 12 ? "Mengisi Bagian 12..." : "Isi Bagian 12"}</button> : null}
             <button className="button secondary" type="button" onClick={() => refreshContent365(true)} disabled={content365Busy === "refresh" || Boolean(batchImportBusy)}>{content365Busy === "refresh" ? "Memuat..." : "Segarkan"}</button>
           </div>
         </div>

@@ -1,0 +1,159 @@
+{
+  "project": "PEBISNIS DIGITAL TELEGRAM",
+  "batch": 12,
+  "calendar_days": "331-360",
+  "keyword": "MAU",
+  "note": "30 episode Bagian 12 dengan 4 pilar bergilir, hook doodle, caption MAU, dan materi praktik untuk pemula.",
+  "episodes": [
+    {
+      "day": 331, "pillar": "PIKIR", "image_hook": "LIHAT PESAING TERUS, KERJA KAPAN?",
+      "caption": "EPS 331 · PIKIR\n\nBaru mau bikin produk, eh lihat kompetitor sudah punya toko cantik, ribuan testimoni, dan tim lengkap. Kita malah tutup laptop.\n\nPadahal melihat orang lain boleh, asal tidak lupa mengerjakan milik sendiri. Mau latihan 15 menitnya? Ketik MAU 👇",
+      "material": "EPS 331 · PIKIR\n\nBERHENTI MEMBANDINGKAN PANGGUNG ORANG\n\nKita hanya melihat bagian yang ditampilkan, bukan semua proses di belakangnya.\n---\nLATIHAN 15 MENIT\n\n5 menit: catat satu hal berguna yang bisa dipelajari dari penawaran lain.\n5 menit: tulis masalah pembeli yang ingin kamu bantu.\n5 menit: buat satu langkah kecil untuk solusi milikmu.\n---\nINGAT\n\nBelajar dari cara orang menjelaskan boleh. Menyalin karya, desain, atau testimoni tanpa izin tidak boleh. Jadikan perbandingan sebagai bahan kerja, bukan alasan menyerah."
+    },
+    {
+      "day": 332, "pillar": "PEMBELI", "image_hook": "GAK PUNYA EMAIL, GAK BISA BELI?",
+      "caption": "EPS 332 · PEMBELI\n\nAda calon pembeli pensiunan yang hanya biasa pakai WhatsApp. Dia ingin membeli ebook, tapi diminta membuat akun di tiga tempat dulu.\n\nBukan produknya yang ditolak. Mungkin jalan belinya terlalu berliku. Mau cara memeriksanya? Ketik MAU 👇",
+      "material": "EPS 332 · PEMBELI\n\nKURANGI LANGKAH YANG TIDAK PERLU\n\nSetiap langkah tambahan bisa menyulitkan orang yang belum terbiasa. Tetap jaga keamanan transaksi dan akses.\n---\nUJI DARI SUDUT PEMULA\n\n1. Buka halaman produk dari HP.\n2. Hitung langkah sampai informasi pembayaran terlihat.\n3. Catat istilah yang sulit dimengerti.\n4. Periksa cara menerima file setelah membayar.\n---\nPERBAIKAN\n\nJika akun atau email memang wajib, jelaskan alasannya dan beri petunjuk bergambar. Jangan meminta data berlebihan hanya karena formulirnya tersedia."
+    },
+    {
+      "day": 333, "pillar": "PRODUK", "image_hook": "WARNA CANTIK BELUM TENTU BERGUNA",
+      "caption": "EPS 333 · PRODUK\n\nTemplate keuangan kita ungu-pink, hiasannya lucu banget. Tapi pengguna tidak tahu harus mengisi angka di kolom mana.\n\nNah, desain menarik belum otomatis mudah dipakai. Mau cara menguji template sebelum dijual? Ketik MAU 👇",
+      "material": "EPS 333 · PRODUK\n\nDESAIN HARUS MEMBANTU TUGAS\n\nMulailah dari pekerjaan pembeli, baru memilih warna dan dekorasi.\n---\nTES TIGA PERTANYAAN\n\n1. Apakah pengguna tahu bagian yang diisi dulu?\n2. Apakah judul kolom mudah dimengerti?\n3. Apakah contoh pengisian tersedia?\n---\nCOBA\n\nMinta satu orang membuka template selama dua menit tanpa arahan. Amati bagian yang membingungkan, lalu perbaiki. Warna boleh tetap menarik, tetapi jangan sampai menutupi angka atau instruksi penting."
+    },
+    {
+      "day": 334, "pillar": "SISTEM", "image_hook": "BOT KIRIM PESAN DOBEL?",
+      "caption": "EPS 334 · SISTEM\n\nPembeli sudah menerima link. Lima menit kemudian bot mengirim link yang sama lagi, lalu sekali lagi. Bukannya terbantu, orang jadi curiga.\n\nAda satu aturan sederhana untuk mencegah kiriman ganda. Mau? Ketik MAU 👇",
+      "material": "EPS 334 · SISTEM\n\nSATU PESANAN, SATU KEPUTUSAN KIRIM\n\nSistem otomatis bisa mengulang pekerjaan saat ada gangguan jaringan. Catatan pengiriman membantu mencegah duplikasi.\n---\nCATAT EMPAT HAL\n\n1. Nomor pesanan atau penerima yang tepat.\n2. Jenis pesan yang akan dikirim.\n3. Status: menunggu, berhasil, atau gagal.\n4. Waktu dan hasil percobaan terakhir.\n---\nTES AMAN\n\nCoba pada akun uji milik sendiri sebelum ke pelanggan. Jika pesan sudah berhasil, jangan kirim ulang hanya karena tombol ditekan dua kali. Pastikan data penerima tetap terlindungi."
+    },
+    {
+      "day": 335, "pillar": "PIKIR", "image_hook": "USIA 60 BARU BELAJAR? KENAPA NGGAK?",
+      "caption": "EPS 335 · PIKIR\n\n'Aduh, umur sudah segini, masa belajar jualan lewat HP?' Siapa bilang tombol di layar cuma milik anak muda?\n\nTidak perlu langsung hafal semua aplikasi. Ada latihan kecil yang ramah pemula. Ketik MAU 👇",
+      "material": "EPS 335 · PIKIR\n\nBELAJAR TANPA BERLOMBA KECEPATAN\n\nPengalaman hidup bisa membantu memahami masalah orang. Keterampilan digital dapat dipelajari bertahap.\n---\nLATIHAN 10 MENIT\n\nHari pertama: simpan satu contoh gambar produk.\nHari kedua: tulis tiga kalimat penjelasan sederhana.\nHari ketiga: kirim contoh ke teman yang bersedia memberi masukan.\n---\nJANGAN TERBURU-BURU\n\nCatat langkah dengan tulisan besar jika perlu. Ulangi bagian yang belum nyaman. Jangan memberikan sandi atau kode OTP kepada orang yang menawarkan bantuan. Belajar aman lebih penting daripada terlihat cepat."
+    },
+    {
+      "day": 336, "pillar": "PEMBELI", "image_hook": "MAU JUAL APA? TANYA MEREKA DULU",
+      "caption": "EPS 336 · PEMBELI\n\nKita sibuk menebak produk apa yang bakal laku. Padahal orang di sekitar sudah sering mengeluhkan masalah yang sama.\n\nAda tiga pertanyaan sederhana untuk mencari kebutuhan, tanpa survei ribet. Mau? Ketik MAU 👇",
+      "material": "EPS 336 · PEMBELI\n\nMULAI DARI CERITA ORANG, BUKAN ASUMSI\n\nJangan langsung bertanya 'Mau beli produkku?' sebelum memahami masalahnya.\n---\nTIGA PERTANYAAN\n\n1. Bagian paling merepotkan dari pekerjaan ini apa?\n2. Biasanya bagaimana kamu mengatasinya?\n3. Kalau ada alat bantu, bentuk seperti apa yang paling berguna?\n---\nSETELAH MENDENGAR\n\nCatat pola jawaban tanpa identitas pribadi. Jangan menganggap tiga orang mewakili seluruh pasar. Buat contoh kecil, lalu uji lagi dengan pengguna yang sesuai."
+    },
+    {
+      "day": 337, "pillar": "PRODUK", "image_hook": "KATALOG FOTO JANGAN BIKIN PUSING",
+      "caption": "EPS 337 · PRODUK\n\nTetangga punya banyak produk, tapi fotonya tercecer di galeri. Kalau ditanya harga, dia scroll HP sampai pegal.\n\nItu bisa jadi ide jasa atau template katalog sederhana. Mau susunan satu halaman yang jelas? Ketik MAU 👇",
+      "material": "EPS 337 · PRODUK\n\nKATALOG HARUS MEMUDAHKAN ORANG MEMILIH\n\nBentuknya boleh PDF, gambar, atau halaman web. Yang penting informasinya tepat.\n---\nISI KARTU PRODUK\n\n1. Foto asli atau ilustrasi yang dijelaskan.\n2. Nama dan ukuran/varian.\n3. Harga yang berlaku.\n4. Cara pesan dan ketersediaan jika relevan.\n---\nLATIHAN\n\nBuat katalog tiga produk dulu. Minta orang lain mencari satu barang dan harganya dalam sepuluh detik. Jika masih bingung, kurangi hiasan dan rapikan urutannya. Jangan memakai foto produk orang tanpa izin."
+    },
+    {
+      "day": 338, "pillar": "SISTEM", "image_hook": "CHECKOUT BERHENTI DI TENGAH?",
+      "caption": "EPS 338 · SISTEM\n\nOrang sudah isi nama dan pilih produk, lalu hilang di halaman pembayaran. Kita cuma bisa bilang, 'Yah, batal.'\n\nBisa jadi ada bagian yang membingungkan. Mau cara mencari titik macetnya? Ketik MAU 👇",
+      "material": "EPS 338 · SISTEM\n\nPERIKSA ALUR, BUKAN MENGINTIP ORANG\n\nKita bisa menguji proses checkout tanpa mengumpulkan data pribadi secara berlebihan.\n---\nTES EMPAT TITIK\n\n1. Formulir bisa dibuka dari HP?\n2. Petunjuk pembayaran jelas?\n3. Setelah membayar, langkah berikutnya terlihat?\n4. Bila keluar di tengah, ada cara melanjutkan pesanan?\n---\nLANGKAH\n\nCoba satu transaksi uji dengan data sendiri. Catat bagian yang macet dan perbaiki petunjuknya. Follow-up kepada calon pembeli hanya jika ada konteks dan izin yang sesuai."
+    },
+    {
+      "day": 339, "pillar": "PIKIR", "image_hook": "BISA BANTU, TAK BERANI JUAL?",
+      "caption": "EPS 339 · PIKIR\n\nSetiap hari bantu teman mengerjakan sesuatu. Tapi saat mau membuat panduan berbayar, mendadak merasa, 'Ah, aku siapa?'\n\nTidak perlu mengaku ahli segala hal. Mulai dari hal yang memang sudah kamu bisa. Mau latihan kecilnya? Ketik MAU 👇",
+      "material": "EPS 339 · PIKIR\n\nAJARKAN SATU HAL YANG SUDAH TERUJI\n\nTidak perlu titel hebat untuk berbagi langkah dasar yang benar-benar kamu pahami.\n---\nUJI KELAYAKAN DIRI\n\n1. Pernahkah kamu melakukan tugas ini sendiri?\n2. Bisakah kamu menunjukkan hasil asli?\n3. Bisakah kamu menjelaskan kesalahan yang sering terjadi?\n---\nCOBA\n\nTulis panduan lima langkah tentang satu hal sederhana, misalnya merapikan katalog produk. Minta teman mencobanya. Jika ada langkah yang gagal, revisi. Bersikap jujur soal batas kemampuan membuat pembaca lebih aman."
+    },
+    {
+      "day": 340, "pillar": "PEMBELI", "image_hook": "KEBANYAKAN PILIHAN MALAH TAK JADI",
+      "caption": "EPS 340 · PEMBELI\n\nMau beli satu ebook, disodori 14 paket. Paket A beda tipis dari B, C, D... ujung-ujungnya tab ditutup.\n\nKadang pembeli cuma butuh petunjuk memilih. Mau cara merapikan pilihan? Ketik MAU 👇",
+      "material": "EPS 340 · PEMBELI\n\nBUAT PILIHAN MUDAH DIBANDINGKAN\n\nPaket boleh banyak jika memang punya kebutuhan berbeda, tetapi jelaskan bedanya secara nyata.\n---\nTIGA PERTANYAAN\n\n1. Kebutuhan pemula yang paling umum apa?\n2. Kapan seseorang memerlukan paket lebih lengkap?\n3. Apa yang justru tidak perlu dibeli bersama?\n---\nCOBA PERBAIKI\n\nTampilkan satu rekomendasi untuk kebutuhan sederhana dan satu alternatif untuk kebutuhan lebih luas, dengan perbandingan isi dan harga. Jangan menciptakan kesan paket mahal wajib dibeli jika paket dasar sudah memadai."
+    },
+    {
+      "day": 341, "pillar": "PRODUK", "image_hook": "100 TIPS BELUM TENTU JADI PRODUK",
+      "caption": "EPS 341 · PRODUK\n\nPunya seratus catatan tips dari internet. Digabung jadi PDF tebal, lalu mau dijual. Tapi apa pembeli bisa melakukan sesuatu setelah membacanya?\n\nAda cara menyusun bahan jadi panduan yang benar-benar berguna. Ketik MAU 👇",
+      "material": "EPS 341 · PRODUK\n\nKURASI BUKAN SEKADAR MENGUMPULKAN\n\nProduk perlu tujuan, struktur, dan contoh yang bisa dipraktikkan.\n---\nSUSUN DARI HASIL\n\n1. Tentukan satu pekerjaan yang ingin dibantu.\n2. Pilih hanya langkah yang diperlukan.\n3. Urutkan dari persiapan sampai pemeriksaan.\n4. Tambahkan contoh asli dan latihan.\n---\nJAGA HAK KARYA\n\nJangan menyalin isi orang lain untuk dijual tanpa izin yang sah. Tulis dengan pemahaman sendiri, gunakan sumber yang berhak dipakai, dan cek petunjuk pada orang yang baru belajar."
+    },
+    {
+      "day": 342, "pillar": "SISTEM", "image_hook": "JAM 6 WIB BUKAN JAM 6 SEMUA ORANG",
+      "caption": "EPS 342 · SISTEM\n\nKita bilang konten dikirim pukul 06.00 WIB. Teman di Makassar menunggu jam yang berbeda, lalu mengira botnya telat.\n\nAda cara menulis jadwal supaya tidak salah paham. Mau? Ketik MAU 👇",
+      "material": "EPS 342 · SISTEM\n\nTULIS JAM DAN ZONA WAKTU DENGAN JELAS\n\nWaktu yang sama bisa terlihat berbeda di wilayah berbeda. Untuk Indonesia, WIB, WITA, dan WIT bukan jam yang sama.\n---\nCONTOH PENJELASAN\n\n'Konten dikirim pukul 06.00 WIB, setara 07.00 WITA atau 08.00 WIT.'\n---\nTES SEBELUM AKTIF\n\n1. Pastikan zona waktu yang tersimpan di sistem.\n2. Periksa tanggal mulai serta hari berjalan.\n3. Coba satu pengiriman uji.\n4. Lihat log hasil sebenarnya, bukan hanya tampilan jadwal.\n\nJangan mengubah jadwal aktif tanpa memahami dampaknya pada pelanggan."
+    },
+    {
+      "day": 343, "pillar": "PIKIR", "image_hook": "FOLLOWER CUMA 50, TERUS KENAPA?",
+      "caption": "EPS 343 · PIKIR\n\nBaru punya 50 pengikut. Kita merasa tidak pantas menawarkan apa-apa sampai angkanya ribuan.\n\nPadahal orang bisa butuh solusi meski akunmu belum ramai. Mau latihan mencari percakapan bermutu? Ketik MAU 👇",
+      "material": "EPS 343 · PIKIR\n\nPERHATIKAN KEBUTUHAN, BUKAN CUMA JUMLAH\n\nPengikut banyak tidak otomatis berarti pembeli cocok.\n---\nLATIHAN MINGGU INI\n\n1. Pilih satu masalah yang kamu bisa bantu.\n2. Buat satu konten jawaban konkret.\n3. Ajak orang bertanya tanpa tekanan.\n4. Catat pertanyaan yang benar-benar muncul.\n---\nEVALUASI\n\nLihat apakah orang memahami penjelasanmu dan merasa terbantu. Jangan mengarang komentar atau membeli pengikut untuk tampak besar. Mulai dengan hubungan yang nyata."
+    },
+    {
+      "day": 344, "pillar": "PEMBELI", "image_hook": "BELUM BELI, BUKAN BERARTI PELIT",
+      "caption": "EPS 344 · PEMBELI\n\nCalon pembeli bilang, 'Masih mikir, Kak.' Kita buru-buru menebak dia keberatan harga. Padahal mungkin belum paham cara pakainya.\n\nMau cara bertanya tanpa bikin orang merasa diinterogasi? Ketik MAU 👇",
+      "material": "EPS 344 · PEMBELI\n\nJANGAN MENEBAK KEBERATAN ORANG\n\nMemberi ruang bertanya lebih membantu daripada langsung menawarkan potongan harga.\n---\nSATU PERTANYAAN RINGAN\n\n'Boleh aku bantu jelaskan bagian yang masih bikin ragu, Kak? Misalnya isi, cara pakai, atau aksesnya.'\n---\nJIKA ADA JAWABAN\n\nTanggapi bagian itu saja dengan contoh konkret. Bila memang tidak cocok, katakan apa adanya. Jika tidak dibalas, hormati. Pembeli berhak berpikir tanpa merasa dikejar oleh penjual."
+    },
+    {
+      "day": 345, "pillar": "PRODUK", "image_hook": "SUDAH BELI, BOLEH DIJUAL LAGI?",
+      "caption": "EPS 345 · PRODUK\n\nPembeli membeli template, lalu bertanya, 'Boleh aku edit dan jual lagi?' Kita sendiri belum menulis aturan pakainya.\n\nNah, jangan menunggu ribut baru bicara izin. Mau format penjelasan hak pakai yang sederhana? Ketik MAU 👇",
+      "material": "EPS 345 · PRODUK\n\nJELASKAN HAK PAKAI SEBELUM TRANSAKSI\n\nPembeli perlu tahu apa yang diperbolehkan dan dilarang. Ketentuan harus sesuai hak yang benar-benar kamu miliki.\n---\nTULIS EMPAT HAL\n\n1. Boleh dipakai untuk keperluan apa?\n2. Boleh diedit atau dicetak?\n3. Boleh dibagikan atau dijual ulang?\n4. Bagaimana aturan dukungan dan pembaruan?\n---\nCONTOH\n\n'File ini untuk pemakaian pribadi; boleh diedit untuk kebutuhan sendiri, tetapi tidak boleh dijual ulang.' Jika memakai aset pihak lain, periksa lisensinya terlebih dahulu. Hindari mengklaim hak yang tidak kamu punya."
+    },
+    {
+      "day": 346, "pillar": "SISTEM", "image_hook": "PESANAN MANA PUNYA SIAPA?",
+      "caption": "EPS 346 · SISTEM\n\nAda lima pembeli bernama 'Bu Ani' minggu ini. Saat mencari bukti bayar, kita bingung file mana milik siapa.\n\nSatu nomor pesanan kecil bisa mencegah salah kirim. Mau pola pencatatannya? Ketik MAU 👇",
+      "material": "EPS 346 · SISTEM\n\nBERI IDENTITAS UNIK PADA PESANAN\n\nNama pelanggan saja tidak cukup untuk membedakan transaksi.\n---\nCATAT DI SATU TEMPAT\n\n1. Nomor pesanan unik.\n2. Nama produk dan total pembayaran.\n3. Status verifikasi pembayaran.\n4. Status akses dikirim.\n---\nCONTOH\n\nGunakan format seperti PD-202611-001 yang tidak menampilkan nomor HP. Cocokkan berdasarkan nomor pesanan saat memberikan bantuan. Batasi akses ke data pesanan, dan jangan mengirim daftar pelanggan ke grup umum."
+    },
+    {
+      "day": 347, "pillar": "PIKIR", "image_hook": "PELAN BUKAN BERARTI BERHENTI",
+      "caption": "EPS 347 · PIKIR\n\nTeman lain launching tiga produk sebulan. Kita baru selesai satu halaman panduan. Rasanya kecil sekali.\n\nPadahal langkah yang benar-benar selesai lebih berguna daripada daftar rencana panjang. Mau cara memecah target? Ketik MAU 👇",
+      "material": "EPS 347 · PIKIR\n\nBUAT TARGET YANG BISA DIKERJAKAN HARI INI\n\nTarget besar membantu arah, tapi pekerjaan harian perlu cukup kecil.\n---\nPECAH SATU TUGAS\n\nTarget: membuat katalog digital.\nHari 1: pilih tiga produk.\nHari 2: foto dan catat harga.\nHari 3: buat satu halaman contoh.\nHari 4: minta orang lain mencoba.\n---\nCEK KEMAJUAN\n\nTuliskan apa yang benar-benar selesai. Jika satu langkah terlalu berat, pecah lagi. Hindari menyebut target belum tercapai sebagai bukti tidak mampu."
+    },
+    {
+      "day": 348, "pillar": "PEMBELI", "image_hook": "ADA YANG LEBIH SUKA MEMBACA",
+      "caption": "EPS 348 · PEMBELI\n\nKita menjelaskan produk lewat video sepuluh menit. Calon pembeli cuma bertanya, 'Ada tulisan ringkasnya, Kak?'\n\nBukan berarti videonya jelek. Orang punya cara belajar yang berbeda. Mau cara menyiapkan dua format? Ketik MAU 👇",
+      "material": "EPS 348 · PEMBELI\n\nJANGAN MEMAKSA SATU CARA BELAJAR\n\nSebagian orang nyaman dengan video, yang lain ingin membaca langkahnya.\n---\nDUA VERSI PENJELASAN\n\nVersi singkat: lima poin teks berisi manfaat, isi, cara pakai, syarat, dan harga.\nVersi demonstrasi: video layar yang menunjukkan satu contoh pemakaian.\n---\nUJI\n\nBerikan pilihan kepada calon pembeli. Pastikan kedua versi menyampaikan fakta yang sama. Jika video mencantumkan harga lama, perbarui atau jelaskan dengan terang."
+    },
+    {
+      "day": 349, "pillar": "PRODUK", "image_hook": "JUDUL PRODUK KOK BIKIN NEBAK?",
+      "caption": "EPS 349 · PRODUK\n\nNama produknya 'Quantum Profit Booster X'. Keren? Mungkin. Tapi ibu warung yang butuh catatan stok jadi tidak tahu isinya apa.\n\nMau rumus nama produk yang langsung kebayang kegunaannya? Ketik MAU 👇",
+      "material": "EPS 349 · PRODUK\n\nNAMA JELAS MEMUDAHKAN ORANG MEMILIH\n\nNama kreatif boleh, tetapi fungsi utama jangan sampai tersembunyi.\n---\nRUMUS SEDERHANA\n\nBentuk produk + pekerjaan yang dibantu + pengguna yang dituju, jika perlu.\n---\nCONTOH\n\n'Quantum Profit Booster X' bisa dijelaskan sebagai 'Template Catatan Stok Warung'. Tambahkan subjudul singkat bila ada kekhususan, misalnya 'bisa diisi lewat HP'. Jangan memasukkan klaim keuntungan yang tidak bisa dibuktikan. Uji: apakah orang baru memahami produknya dari judul saja?"
+    },
+    {
+      "day": 350, "pillar": "SISTEM", "image_hook": "AKSES 365 HARI, MULAINYA KAPAN?",
+      "caption": "EPS 350 · SISTEM\n\nPembeli ambil paket akses setahun. Enam bulan kemudian bertanya, 'Ini habisnya kapan ya?' Kita malah mencari chat lama satu-satu.\n\nMau cara mencatat masa akses supaya jelas untuk dua pihak? Ketik MAU 👇",
+      "material": "EPS 350 · SISTEM\n\nMASA AKSES HARUS TERTULIS DAN KONSISTEN\n\nTentukan kapan hitungan dimulai: setelah pembayaran terverifikasi, aktivasi, atau tanggal lain yang disepakati.\n---\nCATAT EMPAT DATA\n\n1. Nomor pesanan.\n2. Tanggal awal akses beserta zona waktu.\n3. Tanggal akhir sesuai ketentuan yang disampaikan.\n4. Status akses dan jalur bantuan.\n---\nPESAN KONFIRMASI\n\n'Paket Kakak aktif mulai ... hingga ..., sesuai ketentuan pembelian.' Jangan mengubah masa akses diam-diam. Pastikan pelanggan dapat melihat informasinya tanpa harus bertanya berkali-kali."
+    },
+    {
+      "day": 351, "pillar": "PIKIR", "image_hook": "GANTI STRATEGI TANPA CATAT?",
+      "caption": "EPS 351 · PIKIR\n\nMinggu ini ganti jam posting. Besok ganti harga. Lusa ganti judul. Lalu bingung, yang membuat hasil berubah itu yang mana?\n\nMau jurnal percobaan bisnis yang tidak perlu aplikasi rumit? Ketik MAU 👇",
+      "material": "EPS 351 · PIKIR\n\nCATAT SATU PERUBAHAN DALAM SATU WAKTU\n\nHasil promosi dipengaruhi banyak faktor, jadi tidak semua perubahan punya sebab yang pasti. Tetapi catatan membantu belajar.\n---\nEMPAT BARIS JURNAL\n\n1. Apa yang diubah?\n2. Mengapa ingin mengubahnya?\n3. Selama kapan diuji?\n4. Respons apa yang terlihat?\n---\nCONTOH\n\nUji dua versi judul pada kesempatan yang sebanding, bukan mengubah judul, gambar, harga, dan audiens bersamaan. Simpan hasilnya apa adanya, termasuk ketika belum ada peningkatan."
+    },
+    {
+      "day": 352, "pillar": "PEMBELI", "image_hook": "BELI PRODUK, LALU NYANGKUT?",
+      "caption": "EPS 352 · PEMBELI\n\nFile sudah terkirim, tapi pembeli belum tahu cara memulainya. Seminggu kemudian ia bilang, 'Masih kusimpan aja, Kak.'\n\nMungkin yang dibutuhkan bukan bonus baru, melainkan petunjuk langkah pertama. Mau contohnya? Ketik MAU 👇",
+      "material": "EPS 352 · PEMBELI\n\nBANTU PEMBELI MEMULAI, BUKAN MENIMBUN FILE\n\nAkses produk adalah awal pengalaman, bukan akhir pelayanan.\n---\nPESAN MULAI CEPAT\n\n1. Sebut satu tujuan sederhana.\n2. Arahkan ke bagian pertama yang perlu dibuka.\n3. Beri satu latihan lima menit.\n4. Jelaskan cara meminta bantuan jika macet.\n---\nCONTOH\n\n'Kalau punya lima menit, buka halaman 3 dan isi satu contoh. Setelah itu simpan, tidak perlu menamatkan semuanya hari ini.' Jangan mengirim pengingat berulang tanpa izin. Hormati cara belajar masing-masing."
+    },
+    {
+      "day": 353, "pillar": "PRODUK", "image_hook": "SATU MODUL, SATU MASALAH",
+      "caption": "EPS 353 · PRODUK\n\nAda ide ebook besar, tapi tidak kunjung selesai. Tiap hari materinya melebar, karena semua hal ingin dimasukkan.\n\nBagaimana kalau dipecah menjadi modul pendek yang bisa diuji satu per satu? Mau caranya? Ketik MAU 👇",
+      "material": "EPS 353 · PRODUK\n\nMODUL KECIL BISA LEBIH MUDAH DIPRAKTIKKAN\n\nPilih hasil yang jelas untuk setiap bagian, lalu susun urutannya.\n---\nCONTOH PAKET\n\nModul 1: memilih produk yang ingin ditawarkan.\nModul 2: membuat foto atau contoh.\nModul 3: menulis informasi harga dan isi.\nModul 4: memberi petunjuk pembayaran.\n---\nUJI SATU DULU\n\nBuat Modul 1 lengkap dengan contoh dan tugas. Minta pemula mencobanya. Baru lanjut ke modul berikutnya. Jelaskan paket apa yang sudah selesai dan apa yang masih rencana."
+    },
+    {
+      "day": 354, "pillar": "SISTEM", "image_hook": "BOT OTOMATIS JUGA BUTUH UJIAN",
+      "caption": "EPS 354 · SISTEM\n\nBot sudah disetel kirim materi setiap pagi. Kita lega. Tapi pernah belum coba sendiri kalau orang baru tekan START, lalu berhenti berlangganan?\n\nSistem otomatis yang belum dites bisa bikin drama. Mau daftar ujiannya? Ketik MAU 👇",
+      "material": "EPS 354 · SISTEM\n\nTES ALUR SEBELUM DIANDALKAN\n\nGunakan akun uji milik sendiri, bukan pelanggan sungguhan.\n---\nENAM SKENARIO\n\n1. Pengguna baru menekan START.\n2. Pengguna yang berlangganan menerima jadwal benar.\n3. Pengguna yang belum membayar mendapat informasi sesuai status.\n4. Pembayaran terverifikasi menghentikan pengingat bayar.\n5. Pesan gagal dicatat dan ditangani.\n6. Permintaan berhenti dipatuhi.\n---\nCATAT HASIL\n\nPeriksa waktu, penerima, dan isi pesan. Jangan menganggap tombol 'Aktif' berarti seluruh pengiriman pasti berhasil; log sebenarnya tetap perlu diperiksa."
+    },
+    {
+      "day": 355, "pillar": "PIKIR", "image_hook": "MALU KALAU DIANGGAP JUALAN MULU?",
+      "caption": "EPS 355 · PIKIR\n\nMau posting penawaran, tapi takut teman bilang, 'Ih, jualan terus!' Akhirnya produk sudah jadi, tak pernah dikenalkan.\n\nAda cara bercerita tentang manfaat tanpa memaksa orang membeli. Mau contoh polanya? Ketik MAU 👇",
+      "material": "EPS 355 · PIKIR\n\nMENGENALKAN PRODUK BUKAN BERARTI MEMAKSA\n\nOrang boleh memilih apakah penawaranmu relevan. Tugas kita menjelaskan dengan jujur.\n---\nPOLA TIGA POSTING\n\n1. Ceritakan masalah yang sering dialami orang.\n2. Tunjukkan satu tips atau contoh pemecahan.\n3. Kenalkan produk yang membantu menyelesaikan bagian lebih lengkap, beserta batasnya.\n---\nBATAS\n\nTidak perlu menyindir orang yang tidak membeli atau menciptakan rasa takut palsu. Ukur keberhasilan awal dari kejelasan dan pertanyaan bermutu, bukan hanya banyaknya transaksi hari itu."
+    },
+    {
+      "day": 356, "pillar": "PEMBELI", "image_hook": "PEMBELI MAU DIBANTU, BUKAN DIINTEROGASI",
+      "caption": "EPS 356 · PEMBELI\n\nOrang baru tanya satu hal. Kita balas dengan delapan pertanyaan: domisili, umur, pekerjaan, omzet, sampai penghasilan suami. Ya kabur!\n\nMau alur ngobrol yang tetap sopan dan cukup informasinya? Ketik MAU 👇",
+      "material": "EPS 356 · PEMBELI\n\nTANYAKAN HANYA YANG RELEVAN\n\nPertanyaan pembuka harus membantu memilih produk, bukan mengumpulkan data pribadi.\n---\nALUR SINGKAT\n\n1. Jawab pertanyaan awal terlebih dahulu.\n2. Jika perlu, tanya satu hal tentang tujuan penggunaan.\n3. Berikan pilihan atau informasi yang sesuai.\n4. Biarkan orang memutuskan sendiri.\n---\nCONTOH\n\n'Kalau ingin file yang bisa diedit lewat HP, paket A lebih cocok. Kalau cukup dibaca, paket B bisa dipakai.' Hindari meminta identitas atau informasi keuangan yang tidak diperlukan."
+    },
+    {
+      "day": 357, "pillar": "PRODUK", "image_hook": "HURUF KECIL BIKIN ORANG MENYERAH",
+      "caption": "EPS 357 · PRODUK\n\nBuat ebook penuh ilmu. Sayang, hurufnya kecil, abu-abu pucat, dan barisnya rapat. Pembaca yang matanya sudah kurang nyaman cepat menyerah.\n\nMau checklist tampilan yang lebih ramah semua usia? Ketik MAU 👇",
+      "material": "EPS 357 · PRODUK\n\nKETERBACAAN ADALAH BAGIAN DARI MANFAAT\n\nJangan hanya menilai ebook dari sampul. Uji halaman isi pada HP biasa.\n---\nEMPAT PERBAIKAN\n\n1. Gunakan huruf cukup besar dan kontras.\n2. Pisahkan paragraf panjang menjadi bagian pendek.\n3. Beri judul yang menjelaskan isi bagian.\n4. Hindari informasi penting hanya lewat warna.\n---\nTES\n\nMinta pembaca dari kelompok usia berbeda melihat satu halaman. Tanyakan bagian mana yang sulit dibaca. Jika memungkinkan, sediakan versi teks yang bisa diperbesar."
+    },
+    {
+      "day": 358, "pillar": "SISTEM", "image_hook": "PROMO HABIS, LINK MASIH JALAN?",
+      "caption": "EPS 358 · SISTEM\n\nDiskon berakhir kemarin. Tapi halaman checkout masih menampilkan harga promo. Pembeli bayar, admin malah bingung harus memproses berapa.\n\nMau checklist menutup promo tanpa bikin kacau? Ketik MAU 👇",
+      "material": "EPS 358 · SISTEM\n\nPENAWARAN DAN CHECKOUT HARUS SELARAS\n\nKalau harga di iklan, halaman, dan pembayaran berbeda, pengalaman pembeli jadi tidak jelas.\n---\nSEBELUM PROMO BERAKHIR\n\n1. Catat waktu akhir beserta zona waktu.\n2. Tentukan aturan untuk checkout yang sudah dibuat.\n3. Perbarui halaman dan materi promosi yang masih aktif.\n4. Tes harga yang ditagihkan setelah promo selesai.\n---\nJIKA ADA SELISIH\n\nJelaskan masalah dengan jujur dan tangani sesuai ketentuan yang disampaikan saat orang bertransaksi. Jangan mengubah harga pesanan yang sudah disepakati secara diam-diam."
+    },
+    {
+      "day": 359, "pillar": "PIKIR", "image_hook": "ISTIRAHAT BUKAN TUTUP USAHA",
+      "caption": "EPS 359 · PIKIR\n\nBaru jualan digital, langsung merasa harus online 24 jam. Malam dibalas, subuh dibalas, akhir pekan juga. Lama-lama capek sendiri.\n\nBisnis satu orang butuh batas yang manusiawi. Mau cara membuat jam layanan? Ketik MAU 👇",
+      "material": "EPS 359 · PIKIR\n\nJAGA TENAGA AGAR USAHA BISA BERJALAN LAMA\n\nTidak semua pesan harus dibalas seketika, asalkan pembeli tahu kapan bisa berharap mendapat respons.\n---\nTETAPKAN TIGA HAL\n\n1. Jam layanan yang realistis.\n2. Informasi otomatis untuk pesan di luar jam.\n3. Prosedur jika ada kendala akses yang mendesak.\n---\nCONTOH\n\n'Pesan diterima. Jam layanan kami 09.00–17.00 WIB. Kami balas pada jam tersebut.' Jangan mengaku sudah memproses pesanan jika belum. Waktu istirahat penting untuk menjaga kualitas bantuan."
+    },
+    {
+      "day": 360, "pillar": "PEMBELI", "image_hook": "30 HARI LAGI, SUDAH LEBIH JELAS?",
+      "caption": "EPS 360 · PEMBELI\n\nSatu bulan lagi berlalu. Konten bertambah, produk makin rapi, bot makin sibuk. Tapi satu pertanyaan penting: pembeli makin terbantu atau makin bingung?\n\nMau audit empat pertanyaan sebelum lanjut ke episode terakhir? Ketik MAU 👇",
+      "material": "EPS 360 · PEMBELI\n\nTUTUP BULAN DENGAN PERBAIKAN NYATA\n\nJangan mengukur semua kemajuan dari jumlah posting. Lihat juga proses yang dialami orang.\n---\nAUDIT EMPAT PERTANYAAN\n\n1. Pertanyaan pembeli apa yang paling banyak muncul?\n2. Di tahap mana mereka paling sering tersendat?\n3. Bagian produk mana yang paling membantu setelah dicoba?\n4. Satu hal apa yang bisa diperjelas dalam tujuh hari?\n---\nTUGAS\n\nPilih satu masalah, ubah satu bagian, lalu catat responsnya. Jika belum ada cukup data, tulis apa yang masih perlu diuji. Keputusan yang jujur lebih bermanfaat daripada angka yang dibesar-besarkan."
+    }
+  ]
+}
